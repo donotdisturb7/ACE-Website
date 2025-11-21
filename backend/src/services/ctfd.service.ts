@@ -162,6 +162,45 @@ class CTFdService {
       logger.error('Failed to sync scores:', error);
     }
   }
+
+  /**
+   * Créer une session SSO dans CTFd après authentification
+   * @param token JWT token de l'utilisateur
+   * @param email Email de l'utilisateur
+   * @returns URL de redirection vers CTFd ou null si erreur
+   */
+  async createSSOSession(token: string, email: string): Promise<string | null> {
+    if (!config.ctfdUrl) {
+      logger.warn('CTFD_URL not configured, skipping SSO session creation');
+      return null;
+    }
+
+    try {
+      const response = await axios.post(
+        `${config.ctfdUrl}/sso/authenticate`,
+        {
+          token,
+          email,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 5000,
+        }
+      );
+
+      if (response.data.success && response.data.data?.redirect_url) {
+        logger.info(`SSO session created for CTFd: ${email}`);
+        return response.data.data.redirect_url;
+      }
+
+      logger.warn('CTFd SSO response missing redirect_url');
+      return null;
+    } catch (error: any) {
+      // Ne pas bloquer le login si CTFd est indisponible
+      logger.error('Failed to create CTFd SSO session:', error.response?.data || error.message);
+      return null;
+    }
+  }
 }
 
 export default new CTFdService();

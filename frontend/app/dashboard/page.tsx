@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
-import { Clock, Users } from 'lucide-react';
+import { Clock, Users, Flag } from 'lucide-react';
 import { useAdminData } from '@/hooks/useAdminData';
 import { useAdminActions } from '@/hooks/useAdminActions';
 import { useTeamData } from '@/hooks/useTeamData';
@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const { handleExportCSV, handleAssignRoom, handleStartSession } = useAdminActions(allTeams, updateTeam);
   const [activeTab, setActiveTab] = useState<'team' | 'stats' | 'teams' | 'rooms'>('team');
   const [leavingTeam, setLeavingTeam] = useState(false);
+  const [redirectingToCTFd, setRedirectingToCTFd] = useState(false);
 
   const loading = teamLoading || (user?.isAdmin && adminLoading);
 
@@ -55,14 +56,14 @@ export default function DashboardPage() {
 
   const handleLeaveTeam = async () => {
     if (!team) return;
-    
+
     const isCaptain = team.captainId === user?.id;
     const confirmMessage = isCaptain
       ? `Êtes-vous sûr de vouloir supprimer l'équipe "${team.name}" ? Cette action est irréversible et tous les membres seront retirés.`
       : `Êtes-vous sûr de vouloir quitter l'équipe "${team.name}" ?`;
-    
+
     if (!confirm(confirmMessage)) return;
-    
+
     setLeavingTeam(true);
     try {
       const response = await api.post('/teams/leave');
@@ -80,6 +81,56 @@ export default function DashboardPage() {
       alert(err.response?.data?.message || 'Erreur lors de la sortie de l\'équipe');
     } finally {
       setLeavingTeam(false);
+    }
+  };
+
+  const handleRedirectToCTFd = async () => {
+    setRedirectingToCTFd(true);
+    try {
+      // Récupérer le token depuis le cookie ou le localStorage
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1] || localStorage.getItem('token');
+
+      if (!token || !user?.email) {
+        alert('Session expirée. Veuillez vous reconnecter.');
+        setRedirectingToCTFd(false);
+        return;
+      }
+
+      // Créer un formulaire invisible pour envoyer le token à CTFd
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = 'http://localhost:8000/sso/authenticate';
+      form.target = '_blank'; // Ouvrir dans un nouvel onglet
+      form.style.display = 'none';
+
+      // Ajouter le token
+      const tokenInput = document.createElement('input');
+      tokenInput.type = 'hidden';
+      tokenInput.name = 'token';
+      tokenInput.value = token;
+      form.appendChild(tokenInput);
+
+      // Ajouter l'email
+      const emailInput = document.createElement('input');
+      emailInput.type = 'hidden';
+      emailInput.name = 'email';
+      emailInput.value = user.email;
+      form.appendChild(emailInput);
+
+      // Soumettre le formulaire
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+
+      // Attendre un peu avant de réactiver le bouton
+      setTimeout(() => setRedirectingToCTFd(false), 1000);
+    } catch (error: unknown) {
+      console.error('Erreur lors de la connexion à CTFd:', error);
+      alert('Erreur lors de la connexion à CTFd');
+      setRedirectingToCTFd(false);
     }
   };
 
@@ -106,9 +157,21 @@ export default function DashboardPage() {
             </h1>
             <p className="text-gray-400">Bienvenue dans votre dashboard.</p>
           </div>
-          <div className="flex items-center gap-3 px-4 py-2 bg-sky-aqua/10 border border-sky-aqua/20 rounded-xl">
-            <Clock className="w-5 h-5 text-sky-aqua" />
-            <span className="text-sky-aqua font-mono font-bold">J-?? AVANT LE LANCEMENT</span>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            {/* Bouton CTFd */}
+            <button
+              onClick={handleRedirectToCTFd}
+              disabled={redirectingToCTFd}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-neon-rose to-purple-600 hover:from-neon-rose/90 hover:to-purple-600/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-neon-rose/30 hover:scale-105"
+            >
+              <Flag className="w-5 h-5" />
+              <span>{redirectingToCTFd ? 'Connexion...' : 'Accéder au CTFd'}</span>
+            </button>
+            {/* Countdown */}
+            <div className="flex items-center gap-3 px-4 py-2 bg-sky-aqua/10 border border-sky-aqua/20 rounded-xl">
+              <Clock className="w-5 h-5 text-sky-aqua" />
+              <span className="text-sky-aqua font-mono font-bold">J-?? AVANT LE LANCEMENT</span>
+            </div>
           </div>
         </div>
 

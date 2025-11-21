@@ -3,6 +3,7 @@ import { User } from '../models/User';
 import { Registration, RegistrationStatus } from '../models/Registration';
 import authService from '../services/auth.service';
 import emailService from '../services/email.service';
+import ctfdService from '../services/ctfd.service';
 import { generateToken } from '../utils/crypto';
 import { logger } from '../utils/logger';
 import { AuthRequest } from '../types';
@@ -170,6 +171,18 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
+      // Créer une session SSO dans CTFd (ne bloque pas le login si échec)
+      let ctfdRedirectUrl: string | null = null;
+      try {
+        ctfdRedirectUrl = await ctfdService.createSSOSession(token, user.email);
+        if (ctfdRedirectUrl) {
+          logger.info(`CTFd SSO session created for: ${email}`);
+        }
+      } catch (error) {
+        // Ne pas bloquer le login si CTFd est indisponible
+        logger.warn(`Failed to create CTFd SSO session for ${email}, continuing with login`);
+      }
+
       logger.info(`User logged in: ${email}`);
 
       res.json({
@@ -186,6 +199,8 @@ export class AuthController {
             emailVerified: user.emailVerified,
             teamId: user.teamId,
           },
+          // Inclure l'URL de redirection CTFd si disponible
+          ...(ctfdRedirectUrl && { ctfdRedirectUrl }),
         },
       });
     } catch (error) {

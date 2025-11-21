@@ -21,8 +21,18 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
-      router.push('/dashboard');
+      const result = await login(email, password);
+      
+      // Si une URL de redirection CTFd est disponible, on peut rediriger
+      // Sinon, rediriger vers le dashboard
+      if (result?.ctfdRedirectUrl) {
+        // Optionnel: rediriger automatiquement vers CTFd
+        // window.location.href = result.ctfdRedirectUrl;
+        // Ou rediriger vers le dashboard et permettre à l'utilisateur d'accéder à CTFd plus tard
+        router.push('/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || 'Email ou mot de passe incorrect');

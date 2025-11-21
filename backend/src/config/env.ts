@@ -20,6 +20,7 @@ export const config = {
   // CTFd
   ctfdApiUrl: process.env.CTFD_API_URL || '',
   ctfdApiToken: process.env.CTFD_API_TOKEN || '',
+  ctfdUrl: process.env.CTFD_URL || 'http://ace-ctf-platform-ctfd-1:8000',
   
   // Email
   smtpHost: process.env.SMTP_HOST || 'smtp.gmail.com',

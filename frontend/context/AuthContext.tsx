@@ -7,7 +7,7 @@ import { User, ApiResponse } from '@/lib/types';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ ctfdRedirectUrl?: string } | undefined>;
   logout: () => void;
   updateUser: (user: User) => void;
 }
@@ -31,16 +31,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await api.post<ApiResponse<{ token: string; user: User }>>('/auth/login', {
+    const response = await api.post<ApiResponse<{ token: string; user: User; ctfdRedirectUrl?: string }>>('/auth/login', {
       email,
       password,
     });
 
     if (response.data.success && response.data.data) {
-      const { token, user } = response.data.data;
+      const { token, user, ctfdRedirectUrl } = response.data.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
+      
+      // Retourner l'URL de redirection CTFd si disponible
+      if (ctfdRedirectUrl) {
+        return { ctfdRedirectUrl };
+      }
     }
   };
 
