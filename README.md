@@ -1,6 +1,6 @@
 # ACE Escape Game 2025 - Site d'Inscription
 
-Site web pour gérer les inscriptions et le suivi de la ACE 2025
+Site web pour gérer les inscriptions et le suivi de l'ACE 2025.
 
 ## Fonctionnalités
 
@@ -29,13 +29,12 @@ Site web pour gérer les inscriptions et le suivi de la ACE 2025
 - Node.js + Express
 - TypeScript
 - PostgreSQL avec Sequelize ORM
-- Redis
+- Redis pour le cache
 - JWT pour l'authentification
 
 **Infrastructure**
 - Docker Compose
 - Nginx (reverse proxy)
-- MailHog (développement)
 
 ## Démarrage Rapide
 
@@ -45,33 +44,29 @@ Site web pour gérer les inscriptions et le suivi de la ACE 2025
 
 ### Installation
 
-1. Cloner le repository
 ```bash
+# Cloner le repository
 git clone <repository-url>
 cd ACE-website
-```
 
-2. Configurer les variables d'environnement
-```bash
+# Configurer les variables d'environnement
 cp .env.example .env
 # Éditez .env avec vos valeurs
-```
 
-3. Démarrer avec Docker
-```bash
+# Démarrer avec Docker
 npm run dev
 ```
 
-4. Accéder à l'application
-- Frontend : http://localhost:3000
-- Backend API : http://localhost:5000
-- MailHog : http://localhost:8025
+### Accès
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5000
 
 ### Compte Admin
 
-Défini dans `.env` :
-- Email : `admin@ace-escapegame.com`
-- Mot de passe : Variable `ADMIN_PASSWORD`
+Défini dans `.env`:
+- Email: `ADMIN_EMAIL`
+- Password: `ADMIN_PASSWORD`
 
 ## Structure du Projet
 
@@ -92,8 +87,7 @@ ACE-website/
 │   ├── lib/           # Utilities et types
 │   └── Dockerfile
 ├── nginx/             # Configuration Nginx
-├── docker-compose.yml
-└── DEPLOYMENT.md
+└── docker-compose.yml
 ```
 
 ## API Endpoints
@@ -116,29 +110,10 @@ ACE-website/
 - `POST /api/admin/rooms/assign` - Assigner salles
 - `POST /api/admin/sessions/start` - Démarrer session
 
-## Développement
-
-### Backend
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
 ## Documentation
 
-- [Guide de déploiement](./DEPLOYMENT.md)
-
-## Licence
-
-MIT
+- [QUICKSTART.md](./QUICKSTART.md) - Guide de démarrage rapide
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Guide de déploiement
 
 ## Auteur
 

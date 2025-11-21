@@ -12,15 +12,34 @@ const whitelist = [
  * Check if a request should skip rate limiting
  */
 const skipWhitelisted = (req: Request): boolean => {
+  // Get client IP (handling proxies correctly)
+  const clientIp = req.ip ||
+                   req.socket.remoteAddress ||
+                   (req.get('x-forwarded-for')?.split(',')[0]?.trim()) ||
+                   '';
+
+  // Docker bridge networks typically use 172.x.x.x or 10.x.x.x ranges
+  // Check if request comes from Docker internal network
+  const isDockerInternal =
+    clientIp.startsWith('172.') ||
+    clientIp.startsWith('10.') ||
+    clientIp.includes('::ffff:172.') || // IPv6-mapped IPv4
+    clientIp.includes('::ffff:10.');
+
+  if (isDockerInternal) {
+    return true;
+  }
+
+  // Fallback: Check for custom header or hostname
   const hostname = req.hostname || req.get('host') || '';
   const userAgent = req.get('user-agent') || '';
   const forwardedHost = req.get('x-forwarded-host') || '';
   const serviceName = req.get('x-service-name') || '';
-  
+
   // Check if any identifier contains a whitelisted service name
   const identifiers = [hostname, userAgent, forwardedHost, serviceName].join(' ').toLowerCase();
-  
-  return whitelist.some(service => 
+
+  return whitelist.some(service =>
     identifiers.includes(service.toLowerCase())
   );
 };
