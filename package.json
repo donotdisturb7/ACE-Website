@@ -1,0 +1,28 @@
+{
+  "name": "ace-escape-game",
+  "version": "1.0.0",
+  "description": "Site d'inscription pour la ACE 2025",
+  "private": true,
+  "scripts": {
+    "dev": "docker compose up",
+    "dev:detach": "docker compose up -d",
+    "build": "docker compose build",
+    "start": "docker compose up -d",
+    "stop": "docker compose down",
+    "logs": "docker compose logs -f",
+    "logs:backend": "docker compose logs -f backend",
+    "logs:frontend": "docker compose logs -f frontend",
+    "clean": "docker compose down -v",
+    "db:migrate": "cd backend && npm run migrate",
+    "db:seed": "cd backend && npm run seed"
+  },
+  "keywords": [
+    "escape-game",
+    "ctf",
+    "cybersecurity",
+    "registration"
+  ],
+  "author": "Rénald DESIRE",
+  "license": "MIT"
+}
+

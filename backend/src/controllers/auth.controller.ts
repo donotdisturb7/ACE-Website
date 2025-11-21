@@ -1,0 +1,300 @@
+import { Request, Response } from 'express';
+import { User } from '../models/User';
+import { Registration, RegistrationStatus } from '../models/Registration';
+import authService from '../services/auth.service';
+import emailService from '../services/email.service';
+import { generateToken } from '../utils/crypto';
+import { logger } from '../utils/logger';
+import { AuthRequest } from '../types';
+
+export class AuthController {
+  /**
+   * Register a new user
+   */
+  async register(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password, firstName, lastName, school, grade, specialty } = req.body;
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        res.status(400).json({
+          success: false,
+          message: 'Un compte avec cet email existe déjà.',
+        });
+        return;
+      }
+
+      // Generate verification token
+      const verificationToken = generateToken();
+      const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      // Create user
+      const user = await User.create({
+        email,
+        password,
+        firstName,
+        lastName,
+        school,
+        grade,
+        specialty,
+        verificationToken,
+        verificationTokenExpiry,
+        emailVerified: false,
+        isAdmin: false,
+      });
+
+      // Create registration record
+      await Registration.create({
+        userId: user.id,
+        status: RegistrationStatus.PENDING,
+      });
+
+      // Send verification email (optional en dev)
+      try {
+        await emailService.sendVerificationEmail(email, verificationToken, firstName);
+      } catch (emailError) {
+        logger.warn(`Failed to send verification email to ${email}. User can still verify manually.`);
+      }
+
+      logger.info(`New user registered: ${email}`);
+
+      res.status(201).json({
+        success: true,
+        message: 'Inscription réussie ! Vérifiez votre email pour activer votre compte.',
+        data: {
+          userId: user.id,
+          email: user.email,
+        },
+      });
+    } catch (error) {
+      logger.error('Registration error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erreur lors de l\'inscription.',
+      });
+    }
+  }
+
+  /**
+   * Verify email with token
+   */
+  async verifyEmail(req: Request, res: Response): Promise<void> {
+    try {
+      const { token } = req.body;
+
+      // Find user with this token
+      const user = await User.findOne({
+        where: { verificationToken: token },
+      });
+
+      if (!user) {
+        res.status(400).json({
+          success: false,
+          message: 'Token invalide ou expiré.',
+        });
+        return;
+      }
+
+      // Check if token expired
+      if (user.verificationTokenExpiry && user.verificationTokenExpiry < new Date()) {
+        res.status(400).json({
+          success: false,
+          message: 'Token expiré. Demandez un nouveau lien de vérification.',
+        });
+        return;
+      }
+
+      // Update user
+      user.emailVerified = true;
+      user.verificationToken = null;
+      user.verificationTokenExpiry = null;
+      await user.save();
+
+      // Update registration status
+      await Registration.update(
+        { status: RegistrationStatus.VERIFIED, verifiedAt: new Date() },
+        { where: { userId: user.id } }
+      );
+
+      logger.info(`Email verified for user: ${user.email}`);
+
+      res.json({
+        success: true,
+        message: 'Email vérifié avec succès ! Vous pouvez maintenant créer ou rejoindre une équipe.',
+      });
+    } catch (error) {
+      logger.error('Email verification error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erreur lors de la vérification.',
+      });
+    }
+  }
+
+  /**
+   * Login user
+   */
+  async login(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+
+      // Find user
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        res.status(401).json({
+          success: false,
+          message: 'Email ou mot de passe incorrect.',
+        });
+        return;
+      }
+
+      // Check password
+      const isPasswordValid = await user.comparePassword(password);
+      if (!isPasswordValid) {
+        res.status(401).json({
+          success: false,
+          message: 'Email ou mot de passe incorrect.',
+        });
+        return;
+      }
+
+      // Generate token
+      const token = authService.generateToken(user);
+
+      // Set cookie
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      logger.info(`User logged in: ${email}`);
+
+      res.json({
+        success: true,
+        message: 'Connexion réussie.',
+        data: {
+          token,
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            isAdmin: user.isAdmin,
+            emailVerified: user.emailVerified,
+            teamId: user.teamId,
+          },
+        },
+      });
+    } catch (error) {
+      logger.error('Login error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erreur lors de la connexion.',
+      });
+    }
+  }
+
+  /**
+   * Get current user profile
+   */
+  async getProfile(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          message: 'Non authentifié.',
+        });
+        return;
+      }
+
+      const user = await User.findByPk(req.user.id, {
+        attributes: { exclude: ['password', 'verificationToken'] },
+        include: ['team'],
+      });
+
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: 'Utilisateur non trouvé.',
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: user,
+      });
+    } catch (error) {
+      logger.error('Get profile error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erreur lors de la récupération du profil.',
+      });
+    }
+  }
+
+  /**
+   * Logout user
+   */
+  async logout(req: Request, res: Response): Promise<void> {
+    res.clearCookie('token');
+    res.json({
+      success: true,
+      message: 'Déconnexion réussie.',
+    });
+  }
+
+  /**
+   * Resend verification email
+   */
+  async resendVerification(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: 'Utilisateur non trouvé.',
+        });
+        return;
+      }
+
+      if (user.emailVerified) {
+        res.status(400).json({
+          success: false,
+          message: 'Email déjà vérifié.',
+        });
+        return;
+      }
+
+      // Generate new token
+      const verificationToken = generateToken();
+      const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      user.verificationToken = verificationToken;
+      user.verificationTokenExpiry = verificationTokenExpiry;
+      await user.save();
+
+      // Send email
+      await emailService.sendVerificationEmail(email, verificationToken, user.firstName);
+
+      res.json({
+        success: true,
+        message: 'Email de vérification renvoyé.',
+      });
+    } catch (error) {
+      logger.error('Resend verification error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erreur lors de l\'envoi de l\'email.',
+      });
+    }
+  }
+}
+
+export default new AuthController();
+
