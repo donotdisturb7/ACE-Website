@@ -296,6 +296,7 @@ export class TeamController {
       }
 
       const team = await Team.findByPk(user.teamId, {
+        attributes: ['id', 'name', 'inviteCode', 'captainId', 'isComplete', 'roomNumber', 'sessionStartTime', 'currentScore', 'rank'],
         include: [
           {
             model: User,

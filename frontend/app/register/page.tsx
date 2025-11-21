@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+import { User, Mail, Lock, School, BookOpen, GraduationCap, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
+import NavigationBar from '@/components/NavigationBar';
+import FormField from '@/components/forms/FormField';
+import FormSection from '@/components/forms/FormSection';
+import SuccessMessage from '@/components/ui/SuccessMessage';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -50,8 +53,9 @@ export default function RegisterPage() {
       if (response.data.success) {
         setSuccess(true);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur lors de l\'inscription');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Erreur lors de l&apos;inscription');
     } finally {
       setLoading(false);
     }
@@ -59,184 +63,190 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-midnight-blue to-sky-aqua flex items-center justify-center px-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
-          <div className="text-6xl mb-4">✉️</div>
-          <h2 className="text-2xl font-bold text-midnight-blue mb-4">
-            Vérifiez votre email !
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Un email de vérification a été envoyé à <strong>{formData.email}</strong>.
-            Cliquez sur le lien dans l'email pour activer votre compte.
-          </p>
-          <Link 
-            href="/login"
-            className="inline-block bg-midnight-blue text-white px-6 py-2 rounded-lg hover:bg-opacity-90 transition"
-          >
-            Aller à la connexion
-          </Link>
-        </div>
+      <div className="min-h-screen bg-deep-navy relative overflow-hidden">
+        <NavigationBar />
+        <SuccessMessage
+          title="Mission acceptée !"
+          message="Un lien d'activation sécurisé a été envoyé à"
+          email={formData.email}
+          linkHref="/login"
+          linkText="Retour à la base"
+        />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-midnight-blue to-sky-aqua flex items-center justify-center px-4 py-12">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full">
-        <h1 className="text-3xl font-bold text-midnight-blue mb-2">Inscription ACE 2025</h1>
-        <p className="text-gray-600 mb-6">Créez votre compte pour participer à l'escape game</p>
+    <div className="min-h-screen bg-deep-navy relative overflow-hidden">
+      <NavigationBar />
+      <div className="py-12 px-4 relative overflow-hidden flex items-center justify-center min-h-screen">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none -z-10" />
+      <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-sky-aqua/10 blur-[100px] rounded-full -z-10" />
+      <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-neon-rose/10 blur-[100px] rounded-full -z-10" />
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
+      <div className="w-full max-w-3xl">
+        <div className="text-center mb-10">
+          <h1 className="font-display text-4xl font-bold text-white mb-2 text-glow">Inscription</h1>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Prénom *
-              </label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neon-rose focus:border-transparent"
-              />
+        <div className="glass-panel p-8 rounded-2xl border border-white/10">
+          {error && (
+            <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-400">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <p>{error}</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nom *
-              </label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neon-rose focus:border-transparent"
-              />
-            </div>
-          </div>
+          )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email *
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neon-rose focus:border-transparent"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Section Identité */}
+            <FormSection title="Identité" titleColor="text-sky-aqua">
+              <div className="grid md:grid-cols-2 gap-6">
+                <FormField
+                  label="Prénom"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  placeholder="John"
+                  required
+                  icon={User}
+                  iconColor="text-gray-500"
+                />
+                <FormField
+                  label="Nom"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  placeholder="Doe"
+                  required
+                  icon={User}
+                  iconColor="text-gray-500"
+                />
+              </div>
+            </FormSection>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Mot de passe *
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                minLength={8}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neon-rose focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirmer le mot de passe *
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                minLength={8}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neon-rose focus:border-transparent"
-              />
-            </div>
-          </div>
+            {/* Section Connexion */}
+            <FormSection title="Identifiants" titleColor="text-neon-rose">
+              <div className="space-y-6">
+                <FormField
+                  label="Email Académique"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="student@school.com"
+                  required
+                  icon={Mail}
+                  iconColor="text-gray-500"
+                />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Lycée *
-            </label>
-            <input
-              type="text"
-              name="school"
-              value={formData.school}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neon-rose focus:border-transparent"
-            />
-          </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <FormField
+                    label="Mot de passe"
+                    name="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required
+                    minLength={8}
+                    icon={Lock}
+                    iconColor="text-gray-500"
+                  />
+                  <FormField
+                    label="Confirmation"
+                    name="confirmPassword"
+                    type="password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required
+                    minLength={8}
+                    icon={Lock}
+                    iconColor="text-gray-500"
+                  />
+                </div>
+              </div>
+            </FormSection>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Classe *
-              </label>
-              <select
-                name="grade"
-                value={formData.grade}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neon-rose focus:border-transparent"
-              >
-                <option value="">Sélectionner</option>
-                <option value="Seconde">Seconde</option>
-                <option value="Première">Première</option>
-                <option value="Terminale">Terminale</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Spécialité *
-              </label>
-              <select
-                name="specialty"
-                value={formData.specialty}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neon-rose focus:border-transparent"
-              >
-                <option value="">Sélectionner</option>
-                <option value="NSI">NSI (Numérique et Sciences Informatiques)</option>
-                <option value="SI">SI (Sciences de l'Ingénieur)</option>
-                <option value="Mathématiques">Mathématiques</option>
-                <option value="Autre">Autre</option>
-              </select>
-            </div>
-          </div>
+            {/* Section Scolarité */}
+            <FormSection title="Informations" titleColor="text-purple-500">
+              <div className="space-y-6">
+                <FormField
+                  label="Établissement"
+                  name="school"
+                  value={formData.school}
+                  onChange={handleChange}
+                  placeholder="Lycée Victor Hugo"
+                  required
+                  icon={School}
+                  iconColor="text-gray-500"
+                />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-neon-rose text-white py-3 rounded-lg font-semibold hover:bg-opacity-90 transition disabled:opacity-50"
-          >
-            {loading ? 'Inscription en cours...' : 'S\'inscrire'}
-          </button>
-        </form>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <FormField
+                    label="Niveau"
+                    name="grade"
+                    value={formData.grade}
+                    onChange={handleChange}
+                    required
+                    icon={GraduationCap}
+                    iconColor="text-gray-500"
+                  >
+                    <option value="" className="bg-deep-navy">Sélectionner...</option>
+                    <option value="Seconde" className="bg-deep-navy">Seconde</option>
+                    <option value="Première" className="bg-deep-navy">Première</option>
+                    <option value="Terminale" className="bg-deep-navy">Terminale</option>
+                  </FormField>
+                  <FormField
+                    label="Spécialité"
+                    name="specialty"
+                    value={formData.specialty}
+                    onChange={handleChange}
+                    required
+                    icon={BookOpen}
+                    iconColor="text-gray-500"
+                  >
+                    <option value="" className="bg-deep-navy">Sélectionner...</option>
+                    <option value="NSI" className="bg-deep-navy">NSI</option>
+                    <option value="SI" className="bg-deep-navy">SI</option>
+                    <option value="Mathématiques" className="bg-deep-navy">Mathématiques</option>
+                    <option value="Autre" className="bg-deep-navy">Autre</option>
+                  </FormField>
+                </div>
+              </div>
+            </FormSection>
 
-        <p className="mt-6 text-center text-gray-600">
-          Déjà inscrit ?{' '}
-          <Link href="/login" className="text-neon-rose hover:underline font-medium">
-            Se connecter
-          </Link>
-        </p>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-neon-rose hover:bg-neon-rose/90 text-white font-bold py-4 rounded-xl transition-all hover:shadow-neon disabled:opacity-50 flex items-center justify-center gap-2 group mt-8"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Initialisation...
+                </>
+              ) : (
+                <>
+                  Confirmer l&apos;inscription
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        <div className="mt-8 text-center">
+          <p className="text-gray-500 text-sm">
+            Déjà un compte ?{' '}
+            <Link href="/login" className="text-sky-aqua hover:text-sky-aqua/80 font-medium hover:underline transition-all">
+              Connexion
+            </Link>
+          </p>
+        </div>
+        </div>
       </div>
     </div>
   );
 }
-
-

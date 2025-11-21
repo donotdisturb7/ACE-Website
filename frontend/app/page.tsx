@@ -1,91 +1,83 @@
-import Link from 'next/link';
+'use client';
+
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import PixelBlast from "@/components/PixelBlast";
+import NavigationBar from "@/components/NavigationBar";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-midnight-blue via-lavender-mist to-sky-aqua">
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-white">ACE 2025</h1>
-        <div className="space-x-4">
-          <Link 
-            href="/login" 
-            className="text-white hover:text-sky-aqua transition"
-          >
-            Connexion
-          </Link>
-          <Link 
-            href="/register" 
-            className="bg-neon-rose text-white px-6 py-2 rounded-lg hover:bg-opacity-90 transition"
-          >
-            S'inscrire
-          </Link>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-deep-navy relative overflow-hidden selection:bg-neon-rose selection:text-white">
+      
+      {/* Header */}
+      <NavigationBar />
 
-      <main className="container mx-auto px-4 py-20 text-center">
-        <h2 className="text-5xl md:text-7xl font-bold text-white mb-6">
-          ACE Escape Game
-        </h2>
-        <p className="text-2xl md:text-3xl text-sky-aqua mb-8">
-          Cybersécurité 2025
-        </p>
-        <p className="text-xl text-white mb-12 max-w-2xl mx-auto">
-          Rejoignez l'aventure cybersécurité la plus excitante de l'année ! 
-          Formez votre équipe de 3 à 5 personnes et relevez les défis.
-        </p>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-16">
-          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 text-white">
-            <h3 className="text-3xl font-bold text-neon-rose mb-2">200</h3>
-            <p>Participants attendus</p>
+      {/* Hero Section */}
+      <main className="relative z-10">
+        <div className="relative w-full h-screen flex items-center justify-center">
+          {/* PixelBlast Background */}
+          <div className="absolute inset-0 z-0">
+            <PixelBlast
+              variant="circle"
+              pixelSize={6}
+              color="#B19EEF"
+              patternScale={3}
+              patternDensity={1.2}
+              pixelSizeJitter={0.5}
+              enableRipples
+              rippleSpeed={0.4}
+              rippleThickness={0.12}
+              rippleIntensityScale={1.5}
+              liquid
+              liquidStrength={0.12}
+              liquidRadius={1.2}
+              liquidWobbleSpeed={5}
+              speed={0.6}
+              edgeFade={0.25}
+              transparent
+            />
           </div>
-          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 text-white">
-            <h3 className="text-3xl font-bold text-sky-aqua mb-2">4</h3>
-            <p>Salles simultanées</p>
-          </div>
-          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 text-white">
-            <h3 className="text-3xl font-bold text-neon-rose mb-2">3-5</h3>
-            <p>Membres par équipe</p>
-          </div>
-        </div>
 
-        <Link 
-          href="/register"
-          className="inline-block bg-neon-rose text-white px-12 py-4 rounded-lg text-xl font-bold hover:bg-opacity-90 transition transform hover:scale-105"
-        >
-          Inscrivez-vous maintenant
-        </Link>
-
-        <div className="mt-20 max-w-3xl mx-auto">
-          <h3 className="text-3xl font-bold text-white mb-8">Comment participer ?</h3>
-          <div className="grid md:grid-cols-3 gap-6 text-left">
-            <div className="bg-white rounded-lg p-6 shadow-lg">
-              <div className="text-3xl font-bold text-neon-rose mb-3">1</div>
-              <h4 className="font-bold text-midnight-blue mb-2">Inscrivez-vous</h4>
-              <p className="text-sm text-gray-600">
-                Créez votre compte et validez votre email
-              </p>
+          {/* Content Overlay */}
+          <div className="container mx-auto px-6 text-center relative z-10 pointer-events-none">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-midnight-blue/50 border border-neon-rose/30 mb-8 animate-fade-in backdrop-blur-md pointer-events-auto">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-rose opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-neon-rose"></span>
+              </span>
+              <span className="text-xs font-medium text-neon-rose uppercase tracking-wider">Inscriptions ouvertes</span>
             </div>
-            <div className="bg-white rounded-lg p-6 shadow-lg">
-              <div className="text-3xl font-bold text-sky-aqua mb-3">2</div>
-              <h4 className="font-bold text-midnight-blue mb-2">Formez votre équipe</h4>
-              <p className="text-sm text-gray-600">
-                Créez ou rejoignez une équipe de 3 à 5 personnes
-              </p>
-            </div>
-            <div className="bg-white rounded-lg p-6 shadow-lg">
-              <div className="text-3xl font-bold text-neon-rose mb-3">3</div>
-              <h4 className="font-bold text-midnight-blue mb-2">Relevez les défis</h4>
-              <p className="text-sm text-gray-600">
-                Résolvez les challenges et grimpez au classement
-              </p>
+            
+            <h1 className="font-display text-5xl lg:text-7xl font-bold mb-6 leading-tight">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-gray-400">
+                Escape Game
+              </span>
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-rose to-sky-aqua text-glow">
+                Cybersécurité
+              </span>
+            </h1>
+            
+           
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pointer-events-auto">
+              <Link
+                href="/register"
+                className="group relative px-8 py-4 bg-neon-rose hover:bg-neon-rose/90 text-white font-bold rounded-xl transition-all hover:scale-105 hover:shadow-neon flex items-center gap-2"
+              >
+                Rejoindre l'aventure
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                href="/login"
+                className="px-8 py-4 bg-deep-navy/80 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-xl backdrop-blur-md transition-all"
+              >
+                J'ai déjà un compte
+              </Link>
             </div>
           </div>
         </div>
       </main>
-
-      <footer className="container mx-auto px-4 py-8 text-center text-white">
-        <p>&copy; 2025 ACE Escape Game - Tous droits réservés</p>
-      </footer>
     </div>
   );
 }

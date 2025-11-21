@@ -13,6 +13,7 @@ import { createAdminUser } from './seeders/admin-seed';
 import authRoutes from './routes/auth.routes';
 import teamRoutes from './routes/team.routes';
 import adminRoutes from './routes/admin.routes';
+import publicRoutes from './routes/public.routes';
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/public', publicRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
