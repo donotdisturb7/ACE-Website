@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { Lock, Mail, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import PixelBlast from "@/components/PixelBlast";
 import NavigationBar from '@/components/NavigationBar';
 
 export default function LoginPage() {
@@ -22,7 +24,7 @@ export default function LoginPage() {
 
     try {
       const result = await login(email, password);
-      
+
       // Si une URL de redirection CTFd est disponible, on peut rediriger
       // Sinon, rediriger vers le dashboard
       if (result?.ctfdRedirectUrl) {
@@ -44,91 +46,114 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-deep-navy relative overflow-hidden">
       <NavigationBar />
-      
+
       <div className="flex items-center justify-center min-h-screen p-4 relative">
         {/* Background Effects */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-          <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-neon-rose/10 blur-[100px] rounded-full" />
-          <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-sky-aqua/10 blur-[100px] rounded-full" />
-          <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+        {/* Background Effects */}
+        <div className="absolute inset-0 z-0 overflow-hidden blur-[3px]">
+          <PixelBlast
+            variant="circle"
+            pixelSize={6}
+            color="#B19EEF"
+            patternScale={3}
+            patternDensity={1.2}
+            pixelSizeJitter={0.5}
+            enableRipples
+            rippleSpeed={0.4}
+            rippleThickness={0.12}
+            rippleIntensityScale={1.5}
+            liquid
+            liquidStrength={0.12}
+            liquidRadius={1.2}
+            liquidWobbleSpeed={5}
+            speed={0.6}
+            edgeFade={0.25}
+            transparent
+          />
         </div>
 
-        <div className="w-full max-w-md">
-        {/* Logo/Brand */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-block font-display text-3xl font-bold tracking-wider text-white mb-2">
-            ACE<span className="text-neon-rose">2025</span>
-          </Link>
-        </div>
-
-        {/* Card */}
-        <div className="glass-panel p-8 rounded-2xl">
-          {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3 text-red-400 text-sm">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              <p>{error}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-400 uppercase tracking-wider ml-1">Email</label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-neon-rose transition-colors" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full bg-deep-navy/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-neon-rose/50 focus:ring-1 focus:ring-neon-rose/50 transition-all"
-                  placeholder="agent@ace.com"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-400 uppercase tracking-wider ml-1">Mot de passe</label>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-sky-aqua transition-colors" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full bg-deep-navy/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-sky-aqua/50 focus:ring-1 focus:ring-sky-aqua/50 transition-all"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-neon-rose hover:bg-neon-rose/90 text-white font-bold py-3.5 rounded-xl transition-all hover:shadow-neon disabled:opacity-50 disabled:hover:shadow-none flex items-center justify-center gap-2 group"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Connexion...
-                </>
-              ) : (
-                <>
-                  Connexion
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        <div className="mt-8 text-center">
-          <p className="text-gray-500 text-sm">
-            Déjà un compte ?{' '}
-            <Link href="/register" className="text-sky-aqua hover:text-sky-aqua/80 font-medium hover:underline transition-all">
-              Inscription
+        <div className="w-full max-w-md relative z-10">
+          {/* Logo/Brand */}
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-block relative w-32 h-32 hover:scale-105 transition-transform duration-300">
+              <Image
+                src="/assets/logo/ACE-LOGO.svg"
+                alt="ACE 2025"
+                fill
+                className="object-contain drop-shadow-[0_0_25px_rgba(255,42,109,0.6)]"
+                priority
+              />
             </Link>
-          </p>
-        </div>
+          </div>
+
+          {/* Card */}
+          <div className="glass-panel p-8 rounded-2xl">
+            {error && (
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3 text-red-400 text-sm">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <p>{error}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-400 uppercase tracking-wider ml-1">Email</label>
+                <div className="relative group">
+                  <Mail className="absolute left-4 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-neon-rose transition-colors" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full bg-deep-navy/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-neon-rose/50 focus:ring-1 focus:ring-neon-rose/50 transition-all"
+                    placeholder="agent@ace.com"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-400 uppercase tracking-wider ml-1">Mot de passe</label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-sky-aqua transition-colors" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full bg-deep-navy/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-sky-aqua/50 focus:ring-1 focus:ring-sky-aqua/50 transition-all"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-neon-rose hover:bg-neon-rose/90 text-white font-bold py-3.5 rounded-xl transition-all hover:shadow-neon disabled:opacity-50 disabled:hover:shadow-none flex items-center justify-center gap-2 group"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Connexion...
+                  </>
+                ) : (
+                  <>
+                    Connexion
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-gray-500 text-sm">
+              Déjà un compte ?{' '}
+              <Link href="/register" className="text-sky-aqua hover:text-sky-aqua/80 font-medium hover:underline transition-all">
+                Inscription
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

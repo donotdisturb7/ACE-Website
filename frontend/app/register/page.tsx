@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { api } from '@/lib/api';
 import { User, Mail, Lock, School, BookOpen, GraduationCap, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
+import PixelBlast from "@/components/PixelBlast";
 import NavigationBar from '@/components/NavigationBar';
 import FormField from '@/components/forms/FormField';
 import FormSection from '@/components/forms/FormSection';
@@ -81,12 +83,40 @@ export default function RegisterPage() {
       <NavigationBar />
       <div className="py-12 px-4 relative overflow-hidden flex items-center justify-center min-h-screen">
         {/* Background Effects */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none -z-10" />
-        <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-sky-aqua/10 blur-[100px] rounded-full -z-10" />
-        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-neon-rose/10 blur-[100px] rounded-full -z-10" />
+        {/* Background Effects */}
+        <div className="absolute inset-0 z-0 overflow-hidden blur-[3px]">
+          <PixelBlast
+            variant="circle"
+            pixelSize={6}
+            color="#B19EEF"
+            patternScale={3}
+            patternDensity={1.2}
+            pixelSizeJitter={0.5}
+            enableRipples
+            rippleSpeed={0.4}
+            rippleThickness={0.12}
+            rippleIntensityScale={1.5}
+            liquid
+            liquidStrength={0.12}
+            liquidRadius={1.2}
+            liquidWobbleSpeed={5}
+            speed={0.6}
+            edgeFade={0.25}
+            transparent
+          />
+        </div>
 
-        <div className="w-full max-w-3xl">
+        <div className="w-full max-w-3xl relative z-10">
           <div className="text-center mb-10">
+            <Link href="/" className="inline-block relative w-24 h-24 mb-6 hover:scale-105 transition-transform duration-300">
+              <Image
+                src="/assets/logo/ACE-LOGO.svg"
+                alt="ACE 2025"
+                fill
+                className="object-contain drop-shadow-[0_0_25px_rgba(255,42,109,0.6)]"
+                priority
+              />
+            </Link>
             <h1 className="font-display text-4xl font-bold text-white mb-2 text-glow">Inscription</h1>
           </div>
 
@@ -252,18 +282,13 @@ export default function RegisterPage() {
                       <optgroup label="Droit & Économie" className="bg-deep-navy">
                         <option value="Droit" className="bg-deep-navy">Droit</option>
                         <option value="Économie" className="bg-deep-navy">Économie</option>
-                        <option value="Gestion" className="bg-deep-navy">Gestion</option>
                         <option value="Sciences Politiques" className="bg-deep-navy">Sciences Politiques</option>
                       </optgroup>
                       <optgroup label="Communication & Arts" className="bg-deep-navy">
                         <option value="Communication" className="bg-deep-navy">Communication</option>
-                        <option value="Journalisme" className="bg-deep-navy">Journalisme</option>
-                        <option value="Arts" className="bg-deep-navy">Arts</option>
-                        <option value="Design" className="bg-deep-navy">Design</option>
                       </optgroup>
                       <optgroup label="Santé & Sport" className="bg-deep-navy">
                         <option value="Médecine" className="bg-deep-navy">Médecine</option>
-                        <option value="Pharmacie" className="bg-deep-navy">Pharmacie</option>
                         <option value="STAPS" className="bg-deep-navy">STAPS (Sport)</option>
                       </optgroup>
                       <optgroup label="Autre" className="bg-deep-navy">
