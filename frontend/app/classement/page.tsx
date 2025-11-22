@@ -19,14 +19,21 @@ export default function ClassementPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Charger immédiatement
     fetchLeaderboard();
+
+    // Auto-refresh toutes les 10 secondes
+    const interval = setInterval(fetchLeaderboard, 10000);
+
+    // Cleanup
+    return () => clearInterval(interval);
   }, []);
 
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/api/public/leaderboard');
+      const response = await api.get('/public/leaderboard');
       if (response.data.success) {
         setTeams(response.data.data.teams || []);
       } else {

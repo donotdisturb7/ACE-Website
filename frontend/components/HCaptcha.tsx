@@ -32,6 +32,11 @@ export default function HCaptcha({ sitekey, onVerify, onError, onExpire }: HCapt
   useEffect(() => {
     const renderCaptcha = () => {
       if (containerRef.current && window.hcaptcha && !widgetIdRef.current) {
+        // Vérifier si le container a déjà un widget (évite double render)
+        if (containerRef.current.children.length > 0) {
+          return;
+        }
+
         try {
           widgetIdRef.current = window.hcaptcha.render(containerRef.current, {
             sitekey,
@@ -44,6 +49,7 @@ export default function HCaptcha({ sitekey, onVerify, onError, onExpire }: HCapt
         }
       }
     };
+
 
     // Vérifier si le script est déjà chargé
     if (window.hcaptcha) {
