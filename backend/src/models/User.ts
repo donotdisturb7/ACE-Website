@@ -53,21 +53,21 @@ export class User extends Model {
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    allowNull: true,
   })
-  school!: string;
+  school!: string | null;
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    allowNull: true,
   })
-  grade!: string;
+  grade!: string | null;
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    allowNull: true,
   })
-  specialty!: string;
+  specialty!: string | null;
 
   @ForeignKey(() => Team)
   @Column({

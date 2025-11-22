@@ -80,171 +80,228 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-deep-navy relative overflow-hidden">
       <NavigationBar />
       <div className="py-12 px-4 relative overflow-hidden flex items-center justify-center min-h-screen">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none -z-10" />
-      <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-sky-aqua/10 blur-[100px] rounded-full -z-10" />
-      <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-neon-rose/10 blur-[100px] rounded-full -z-10" />
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none -z-10" />
+        <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-sky-aqua/10 blur-[100px] rounded-full -z-10" />
+        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-neon-rose/10 blur-[100px] rounded-full -z-10" />
 
-      <div className="w-full max-w-3xl">
-        <div className="text-center mb-10">
-          <h1 className="font-display text-4xl font-bold text-white mb-2 text-glow">Inscription</h1>
-        </div>
+        <div className="w-full max-w-3xl">
+          <div className="text-center mb-10">
+            <h1 className="font-display text-4xl font-bold text-white mb-2 text-glow">Inscription</h1>
+          </div>
 
-        <div className="glass-panel p-8 rounded-2xl border border-white/10">
-          {error && (
-            <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-400">
-              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-              <p>{error}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Section Identité */}
-            <FormSection title="Identité" titleColor="text-sky-aqua">
-              <div className="grid md:grid-cols-2 gap-6">
-                <FormField
-                  label="Prénom"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  placeholder="John"
-                  required
-                  icon={User}
-                  iconColor="text-gray-500"
-                />
-                <FormField
-                  label="Nom"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  placeholder="Doe"
-                  required
-                  icon={User}
-                  iconColor="text-gray-500"
-                />
+          <div className="glass-panel p-8 rounded-2xl border border-white/10">
+            {error && (
+              <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-400">
+                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <p>{error}</p>
               </div>
-            </FormSection>
+            )}
 
-            {/* Section Connexion */}
-            <FormSection title="Identifiants" titleColor="text-neon-rose">
-              <div className="space-y-6">
-                <FormField
-                  label="Email Académique"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="student@school.com"
-                  required
-                  icon={Mail}
-                  iconColor="text-gray-500"
-                />
-
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Section Identité */}
+              <FormSection title="Identité" titleColor="text-sky-aqua">
                 <div className="grid md:grid-cols-2 gap-6">
                   <FormField
-                    label="Mot de passe"
-                    name="password"
-                    type="password"
-                    value={formData.password}
+                    label="Prénom"
+                    name="firstName"
+                    value={formData.firstName}
                     onChange={handleChange}
-                    placeholder="••••••••"
+                    placeholder="John"
                     required
-                    minLength={8}
-                    icon={Lock}
+                    icon={User}
                     iconColor="text-gray-500"
                   />
                   <FormField
-                    label="Confirmation"
-                    name="confirmPassword"
-                    type="password"
-                    value={formData.confirmPassword}
+                    label="Nom"
+                    name="lastName"
+                    value={formData.lastName}
                     onChange={handleChange}
-                    placeholder="••••••••"
+                    placeholder="Doe"
                     required
-                    minLength={8}
-                    icon={Lock}
+                    icon={User}
                     iconColor="text-gray-500"
                   />
                 </div>
-              </div>
-            </FormSection>
+              </FormSection>
 
-            {/* Section Scolarité */}
-            <FormSection title="Informations" titleColor="text-purple-500">
-              <div className="space-y-6">
-                <FormField
-                  label="Établissement"
-                  name="school"
-                  value={formData.school}
-                  onChange={handleChange}
-                  placeholder="Lycée Victor Hugo"
-                  required
-                  icon={School}
-                  iconColor="text-gray-500"
-                />
+              {/* Section Connexion */}
+              <FormSection title="Identifiants" titleColor="text-neon-rose">
+                <div className="space-y-6">
+                  <FormField
+                    label="Email Académique"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="student@school.com"
+                    required
+                    icon={Mail}
+                    iconColor="text-gray-500"
+                  />
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <FormField
-                    label="Niveau"
-                    name="grade"
-                    value={formData.grade}
-                    onChange={handleChange}
-                    required
-                    icon={GraduationCap}
-                    iconColor="text-gray-500"
-                  >
-                    <option value="" className="bg-deep-navy">Sélectionner...</option>
-                    <option value="Seconde" className="bg-deep-navy">Seconde</option>
-                    <option value="Première" className="bg-deep-navy">Première</option>
-                    <option value="Terminale" className="bg-deep-navy">Terminale</option>
-                  </FormField>
-                  <FormField
-                    label="Spécialité"
-                    name="specialty"
-                    value={formData.specialty}
-                    onChange={handleChange}
-                    required
-                    icon={BookOpen}
-                    iconColor="text-gray-500"
-                  >
-                    <option value="" className="bg-deep-navy">Sélectionner...</option>
-                    <option value="NSI" className="bg-deep-navy">NSI</option>
-                    <option value="SI" className="bg-deep-navy">SI</option>
-                    <option value="Mathématiques" className="bg-deep-navy">Mathématiques</option>
-                    <option value="Autre" className="bg-deep-navy">Autre</option>
-                  </FormField>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <FormField
+                      label="Mot de passe"
+                      name="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      required
+                      minLength={8}
+                      icon={Lock}
+                      iconColor="text-gray-500"
+                    />
+                    <FormField
+                      label="Confirmation"
+                      name="confirmPassword"
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      required
+                      minLength={8}
+                      icon={Lock}
+                      iconColor="text-gray-500"
+                    />
+                  </div>
                 </div>
-              </div>
-            </FormSection>
+              </FormSection>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-neon-rose hover:bg-neon-rose/90 text-white font-bold py-4 rounded-xl transition-all hover:shadow-neon disabled:opacity-50 flex items-center justify-center gap-2 group mt-8"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Initialisation...
-                </>
-              ) : (
-                <>
-                  Confirmer l&apos;inscription
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-          </form>
-        </div>
+              {/* Section Informations (optionnelles pour statistiques) */}
+              <FormSection title="Informations (optionnel)" titleColor="text-purple-500">
+                <p className="text-gray-400 text-sm mb-4">
+                  Ces informations nous aident à améliorer l'événement. Elles sont optionnelles mais appréciées.
+                </p>
+                <div className="space-y-6">
+                  <FormField
+                    label="Établissement"
+                    name="school"
+                    value={formData.school}
+                    onChange={handleChange}
+                    placeholder="Lycée, Université, Entreprise..."
+                    icon={School}
+                    iconColor="text-gray-500"
+                  />
 
-        <div className="mt-8 text-center">
-          <p className="text-gray-500 text-sm">
-            Déjà un compte ?{' '}
-            <Link href="/login" className="text-sky-aqua hover:text-sky-aqua/80 font-medium hover:underline transition-all">
-              Connexion
-            </Link>
-          </p>
-        </div>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <FormField
+                      label="Niveau"
+                      name="grade"
+                      value={formData.grade}
+                      onChange={handleChange}
+                      icon={GraduationCap}
+                      iconColor="text-gray-500"
+                    >
+                      <option value="" className="bg-deep-navy">Sélectionner...</option>
+                      <optgroup label="Lycée" className="bg-deep-navy">
+                        <option value="Seconde" className="bg-deep-navy">Seconde</option>
+                        <option value="Première" className="bg-deep-navy">Première</option>
+                        <option value="Terminale" className="bg-deep-navy">Terminale</option>
+                      </optgroup>
+                      <optgroup label="Université" className="bg-deep-navy">
+                        <option value="Licence 1" className="bg-deep-navy">Licence 1</option>
+                        <option value="Licence 2" className="bg-deep-navy">Licence 2</option>
+                        <option value="Licence 3" className="bg-deep-navy">Licence 3</option>
+                        <option value="Master 1" className="bg-deep-navy">Master 1</option>
+                        <option value="Master 2" className="bg-deep-navy">Master 2</option>
+                        <option value="Doctorat" className="bg-deep-navy">Doctorat</option>
+                      </optgroup>
+                      <optgroup label="Autre" className="bg-deep-navy">
+                        <option value="Professionnel" className="bg-deep-navy">Professionnel</option>
+                        <option value="Autre" className="bg-deep-navy">Autre</option>
+                      </optgroup>
+                    </FormField>
+                    <FormField
+                      label="Domaine d'études / Spécialité"
+                      name="specialty"
+                      value={formData.specialty}
+                      onChange={handleChange}
+                      icon={BookOpen}
+                      iconColor="text-gray-500"
+                    >
+                      <option value="" className="bg-deep-navy">Sélectionner...</option>
+                      <optgroup label="Informatique & Technologie" className="bg-deep-navy">
+                        <option value="NSI" className="bg-deep-navy">NSI (Numérique et Sciences Informatiques)</option>
+                        <option value="Informatique" className="bg-deep-navy">Informatique</option>
+                        <option value="Cybersécurité" className="bg-deep-navy">Cybersécurité</option>
+                        <option value="Réseaux" className="bg-deep-navy">Réseaux et Télécommunications</option>
+                        <option value="Intelligence Artificielle" className="bg-deep-navy">Intelligence Artificielle</option>
+                      </optgroup>
+                      <optgroup label="Sciences" className="bg-deep-navy">
+                        <option value="SI" className="bg-deep-navy">SI (Sciences de l'Ingénieur)</option>
+                        <option value="Mathématiques" className="bg-deep-navy">Mathématiques</option>
+                        <option value="Physique" className="bg-deep-navy">Physique</option>
+                        <option value="Chimie" className="bg-deep-navy">Chimie</option>
+                        <option value="Biologie" className="bg-deep-navy">Biologie</option>
+                        <option value="Sciences de la Terre" className="bg-deep-navy">Sciences de la Terre</option>
+                      </optgroup>
+                      <optgroup label="Lettres & Sciences Humaines" className="bg-deep-navy">
+                        <option value="Lettres" className="bg-deep-navy">Lettres</option>
+                        <option value="Histoire" className="bg-deep-navy">Histoire</option>
+                        <option value="Géographie" className="bg-deep-navy">Géographie</option>
+                        <option value="Philosophie" className="bg-deep-navy">Philosophie</option>
+                        <option value="Sociologie" className="bg-deep-navy">Sociologie</option>
+                        <option value="Psychologie" className="bg-deep-navy">Psychologie</option>
+                      </optgroup>
+                      <optgroup label="Langues" className="bg-deep-navy">
+                        <option value="Langues Étrangères" className="bg-deep-navy">Langues Étrangères</option>
+                        <option value="Linguistique" className="bg-deep-navy">Linguistique</option>
+                      </optgroup>
+                      <optgroup label="Droit & Économie" className="bg-deep-navy">
+                        <option value="Droit" className="bg-deep-navy">Droit</option>
+                        <option value="Économie" className="bg-deep-navy">Économie</option>
+                        <option value="Gestion" className="bg-deep-navy">Gestion</option>
+                        <option value="Sciences Politiques" className="bg-deep-navy">Sciences Politiques</option>
+                      </optgroup>
+                      <optgroup label="Communication & Arts" className="bg-deep-navy">
+                        <option value="Communication" className="bg-deep-navy">Communication</option>
+                        <option value="Journalisme" className="bg-deep-navy">Journalisme</option>
+                        <option value="Arts" className="bg-deep-navy">Arts</option>
+                        <option value="Design" className="bg-deep-navy">Design</option>
+                      </optgroup>
+                      <optgroup label="Santé & Sport" className="bg-deep-navy">
+                        <option value="Médecine" className="bg-deep-navy">Médecine</option>
+                        <option value="Pharmacie" className="bg-deep-navy">Pharmacie</option>
+                        <option value="STAPS" className="bg-deep-navy">STAPS (Sport)</option>
+                      </optgroup>
+                      <optgroup label="Autre" className="bg-deep-navy">
+                        <option value="Autre" className="bg-deep-navy">Autre</option>
+                      </optgroup>
+                    </FormField>
+                  </div>
+                </div>
+              </FormSection>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-neon-rose hover:bg-neon-rose/90 text-white font-bold py-4 rounded-xl transition-all hover:shadow-neon disabled:opacity-50 flex items-center justify-center gap-2 group mt-8"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Initialisation...
+                  </>
+                ) : (
+                  <>
+                    Confirmer l&apos;inscription
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-gray-500 text-sm">
+              Déjà un compte ?{' '}
+              <Link href="/login" className="text-sky-aqua hover:text-sky-aqua/80 font-medium hover:underline transition-all">
+                Connexion
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
