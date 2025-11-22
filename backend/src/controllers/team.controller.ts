@@ -6,6 +6,7 @@ import { AuthRequest } from '../types';
 import { generateCode } from '../utils/crypto';
 import { logger } from '../utils/logger';
 import emailService from '../services/email.service';
+import { CTFdWebhookService } from '../services/ctfdWebhook.service';
 
 export class TeamController {
   // Créer une nouvelle équipe
@@ -45,7 +46,7 @@ export class TeamController {
       // Générer un code d'invitation unique
       let inviteCode: string;
       let codeExists = true;
-      
+
       while (codeExists) {
         inviteCode = generateCode(6);
         const teamWithCode = await Team.findOne({ where: { inviteCode } });
@@ -69,7 +70,11 @@ export class TeamController {
         { where: { userId } }
       );
 
-      logger.info(`Team created: ${name} by ${user.email}`);
+      logger.info(`Équipe créée: ${name} par ${user.email}`);
+
+      CTFdWebhookService.notifyTeamCreated(team.id).catch(err =>
+        logger.error('Webhook error:', err)
+      );
 
       res.status(201).json({
         success: true,
@@ -156,7 +161,11 @@ export class TeamController {
       // Envoyer email de bienvenue
       await emailService.sendWelcomeEmail(user.email, user.firstName, team.name);
 
-      logger.info(`User ${user.email} joined team ${team.name}`);
+      logger.info(`Utilisateur ${user.email} a rejoint l'équipe ${team.name}`);
+
+      CTFdWebhookService.notifyMemberAdded(team.id, user.id).catch(err =>
+        logger.error('Webhook error:', err)
+      );
 
       res.json({
         success: true,
@@ -242,6 +251,7 @@ export class TeamController {
 
       const team = await Team.findByPk(user.teamId);
       if (!team) {
+        logger.error(`Team ${user.teamId} not found during leave`);
         res.status(404).json({ success: false, message: 'Équipe non trouvée.' });
         return;
       }
@@ -253,9 +263,17 @@ export class TeamController {
           { teamId: null, status: RegistrationStatus.VERIFIED },
           { where: { teamId: team.id } }
         );
+        const deletedTeamId = team.id;
+        const deletedTeamName = team.name;
+        const deletedCtfdTeamId = team.ctfdTeamId;
         await team.destroy();
-        
-        logger.info(`Team ${team.name} deleted by captain`);
+
+        logger.info(`Équipe ${deletedTeamName} supprimée par le capitaine`);
+
+        CTFdWebhookService.notifyTeamDeleted(deletedTeamId, deletedCtfdTeamId, deletedTeamName).catch(err =>
+          logger.error('Webhook error:', err)
+        );
+
         res.json({ success: true, message: 'Équipe supprimée.' });
       } else {
         // Sinon on retire juste l'utilisateur
@@ -272,7 +290,12 @@ export class TeamController {
         team.isComplete = memberCount >= 3 && memberCount <= 5;
         await team.save();
 
-        logger.info(`User ${user.email} left team ${team.name}`);
+        logger.info(`Utilisateur ${user.email} a quitté l'équipe ${team.name}`);
+
+        CTFdWebhookService.notifyMemberRemoved(team.id, user.id).catch(err =>
+          logger.error('Webhook error:', err)
+        );
+
         res.json({ success: true, message: 'Vous avez quitté l\'équipe.' });
       }
     } catch (error) {
