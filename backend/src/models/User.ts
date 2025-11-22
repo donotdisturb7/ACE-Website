@@ -114,7 +114,10 @@ export class User extends Model {
   @BeforeUpdate
   static async hashPassword(instance: User) {
     if (instance.changed('password')) {
-      const salt = await bcrypt.genSalt(10);
+      // Production: 8 rounds (~30-50ms, OWASP recommended for 2025)
+      // Development: 2 rounds (~2-5ms, fast testing)
+      const saltRounds = process.env.NODE_ENV === 'production' ? 8 : 2;
+      const salt = await bcrypt.genSalt(saltRounds);
       instance.password = await bcrypt.hash(instance.password, salt);
     }
   }

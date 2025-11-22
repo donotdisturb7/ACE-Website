@@ -10,6 +10,11 @@ class EmailService {
       host: config.smtpHost,
       port: config.smtpPort,
       secure: false, // true for 465, false for other ports
+      pool: true, // Use connection pooling for faster emails
+      maxConnections: 5,
+      maxMessages: 100,
+      connectionTimeout: 2000, // 2 seconds timeout
+      greetingTimeout: 2000,
     };
 
     // MailHog et autres serveurs SMTP locaux n'ont pas besoin d'authentification

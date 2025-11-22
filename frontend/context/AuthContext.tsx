@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { User, ApiResponse } from '@/lib/types';
+import { clearAuthData } from '@/lib/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -19,15 +20,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Charger l'utilisateur depuis le localStorage
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    
-    setLoading(false);
+    // Verifier si le token est valide en appelant l'API
+    const validateToken = async () => {
+      const token = localStorage.getItem('token');
+      const savedUser = localStorage.getItem('user');
+
+      if (token && savedUser) {
+        try {
+          // Verifier le token avec l'API
+          const response = await api.get<ApiResponse<User>>('/auth/profile');
+
+          if (response.data.success && response.data.data) {
+            // Token valide, mettre a jour l'utilisateur
+            setUser(response.data.data);
+            localStorage.setItem('user', JSON.stringify(response.data.data));
+          } else {
+            // Token invalide, nettoyer
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+          }
+        } catch (error) {
+          // Erreur API (401, 403, etc.) = token invalide
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
+        }
+      }
+
+      setLoading(false);
+    };
+
+    validateToken();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -50,8 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    clearAuthData();
     setUser(null);
     api.post('/auth/logout').catch(() => {});
   };
