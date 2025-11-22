@@ -12,47 +12,93 @@ const whitelist = [
  * Check if a request should skip rate limiting
  */
 const skipWhitelisted = (req: Request): boolean => {
-  // Get client IP (handling proxies correctly)
+  // IMPORTANT: Only trust Docker internal IPs when running in Docker environment
+  // In production with reverse proxy (Nginx), req.ip will be the real client IP
+  // NOT the Docker internal IP, so this is safe
+
   const clientIp = req.ip ||
                    req.socket.remoteAddress ||
-                   (req.get('x-forwarded-for')?.split(',')[0]?.trim()) ||
                    '';
 
-  // Docker bridge networks typically use 172.x.x.x or 10.x.x.x ranges
-  // Check if request comes from Docker internal network
-  const isDockerInternal =
-    clientIp.startsWith('172.') ||
-    clientIp.startsWith('10.') ||
-    clientIp.includes('::ffff:172.') || // IPv6-mapped IPv4
-    clientIp.includes('::ffff:10.');
+  // Only check Docker internal IPs if we're actually in a Docker environment
+  // This prevents attackers from spoofing X-Forwarded-For headers in production
+  const isDockerEnvironment = process.env.DOCKER_ENV === 'true' || process.env.NODE_ENV === 'development';
 
-  if (isDockerInternal) {
-    return true;
+  if (isDockerEnvironment) {
+    // Docker bridge networks typically use 172.x.x.x or 10.x.x.x ranges
+    const isDockerInternal =
+      clientIp.startsWith('172.') ||
+      clientIp.startsWith('10.') ||
+      clientIp.includes('::ffff:172.') || // IPv6-mapped IPv4
+      clientIp.includes('::ffff:10.');
+
+    if (isDockerInternal) {
+      return true;
+    }
   }
 
-  // Fallback: Check for custom header or hostname
-  const hostname = req.hostname || req.get('host') || '';
-  const userAgent = req.get('user-agent') || '';
-  const forwardedHost = req.get('x-forwarded-host') || '';
-  const serviceName = req.get('x-service-name') || '';
+  // Secondary check: Trusted service header (only trust in Docker environment)
+  // This prevents external attackers from setting X-Service-Name header
+  if (isDockerEnvironment) {
+    const serviceName = req.get('x-service-name') || '';
 
-  // Check if any identifier contains a whitelisted service name
-  const identifiers = [hostname, userAgent, forwardedHost, serviceName].join(' ').toLowerCase();
+    if (serviceName && whitelist.some(service => serviceName.toLowerCase() === service.toLowerCase())) {
+      return true;
+    }
+  }
 
-  return whitelist.some(service =>
-    identifiers.includes(service.toLowerCase())
-  );
+  return false;
 };
 
 /**
  * Rate limiter for auth routes
+ * Uses email-based limiting instead of IP for event scenarios
+ * where many users share the same IP (campus WiFi)
  */
 export const authLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 5, // 5 requests per window
+  max: 100, // 100 requests per IP per window (very high for shared WiFi)
+
+  // Key generator: use email if available, fallback to IP
+  keyGenerator: (req: Request): string => {
+    // Pour login/register, utiliser l'email comme clé
+    const email = req.body?.email;
+    if (email) {
+      return `email:${email.toLowerCase()}`;
+    }
+
+    // Fallback: IP address
+    return req.ip ||
+           req.socket.remoteAddress ||
+           (req.get('x-forwarded-for')?.split(',')[0]?.trim()) ||
+           'unknown';
+  },
+
   message: {
     success: false,
-    message: 'Trop de tentatives. Réessayez dans 10 minutes.',
+    message: 'Trop de tentatives avec cet email. Réessayez dans 10 minutes.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: skipWhitelisted,
+});
+
+/**
+ * Strict rate limiter for login attempts (per email)
+ * Prevents brute force attacks on specific accounts
+ */
+export const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 login attempts per email per window
+
+  keyGenerator: (req: Request): string => {
+    const email = req.body?.email;
+    return email ? `login:${email.toLowerCase()}` : `login-ip:${req.ip || 'unknown'}`;
+  },
+
+  message: {
+    success: false,
+    message: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -61,10 +107,11 @@ export const authLimiter = rateLimit({
 
 /**
  * General API rate limiter
+ * Very permissive for event scenarios with shared WiFi
  */
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per window
+  max: 1000, // 1000 requests per IP per window (for shared campus WiFi)
   message: {
     success: false,
     message: 'Trop de requêtes. Réessayez plus tard.',

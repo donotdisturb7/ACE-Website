@@ -4,6 +4,7 @@ import { Registration, RegistrationStatus } from '../models/Registration';
 import authService from '../services/auth.service';
 import emailService from '../services/email.service';
 import ctfdService from '../services/ctfd.service';
+import { verifyCaptcha, isCaptchaRequired } from '../services/captcha.service';
 import { generateToken } from '../utils/crypto';
 import { logger } from '../utils/logger';
 import { AuthRequest } from '../types';
@@ -14,7 +15,27 @@ export class AuthController {
    */
   async register(req: Request, res: Response): Promise<void> {
     try {
-      const { email, password, firstName, lastName, school, grade, specialty } = req.body;
+      const { email, password, firstName, lastName, school, grade, specialty, captchaToken } = req.body;
+
+      // Verify CAPTCHA if required
+      if (isCaptchaRequired()) {
+        if (!captchaToken) {
+          res.status(400).json({
+            success: false,
+            message: 'Veuillez compléter le CAPTCHA.',
+          });
+          return;
+        }
+
+        const captchaValid = await verifyCaptcha(captchaToken, req.ip);
+        if (!captchaValid) {
+          res.status(400).json({
+            success: false,
+            message: 'CAPTCHA invalide. Veuillez réessayer.',
+          });
+          return;
+        }
+      }
 
       // Check if user already exists
       const existingUser = await User.findOne({ where: { email } });
@@ -51,12 +72,10 @@ export class AuthController {
         status: RegistrationStatus.PENDING,
       });
 
-      // Send verification email (optional en dev)
-      try {
-        await emailService.sendVerificationEmail(email, verificationToken, firstName);
-      } catch (emailError) {
+      // Send verification email in background (don't wait)
+      emailService.sendVerificationEmail(email, verificationToken, firstName).catch(() => {
         logger.warn(`Failed to send verification email to ${email}. User can still verify manually.`);
-      }
+      });
 
       logger.info(`New user registered: ${email}`);
 

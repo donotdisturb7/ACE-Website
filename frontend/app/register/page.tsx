@@ -10,6 +10,7 @@ import NavigationBar from '@/components/NavigationBar';
 import FormField from '@/components/forms/FormField';
 import FormSection from '@/components/forms/FormSection';
 import SuccessMessage from '@/components/ui/SuccessMessage';
+import HCaptcha from '@/components/HCaptcha';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -25,6 +26,10 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>('');
+
+  // hCaptcha sitekey depuis les variables d'environnement
+  const hcaptchaSitekey = process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || '';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,6 +55,7 @@ export default function RegisterPage() {
         school: formData.school,
         grade: formData.grade,
         specialty: formData.specialty,
+        captchaToken: captchaToken || undefined,
       });
 
       if (response.data.success) {
@@ -159,12 +165,12 @@ export default function RegisterPage() {
               <FormSection title="Identifiants" titleColor="text-neon-rose">
                 <div className="space-y-6">
                   <FormField
-                    label="Email Académique"
+                    label="Adresse email"
                     name="email"
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="student@school.com"
+                    placeholder="exemple@gmail.com"
                     required
                     icon={Mail}
                     iconColor="text-gray-500"
@@ -298,6 +304,18 @@ export default function RegisterPage() {
                   </div>
                 </div>
               </FormSection>
+
+              {/* hCaptcha - Seulement en production */}
+              {hcaptchaSitekey && (
+                <div className="flex justify-center">
+                  <HCaptcha
+                    sitekey={hcaptchaSitekey}
+                    onVerify={(token) => setCaptchaToken(token)}
+                    onError={() => setCaptchaToken('')}
+                    onExpire={() => setCaptchaToken('')}
+                  />
+                </div>
+              )}
 
               <button
                 type="submit"
