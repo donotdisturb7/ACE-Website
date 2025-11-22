@@ -61,7 +61,7 @@ export default function NavigationBar({
               <Link href="/" title={brandName} className="flex items-center gap-4 outline-none group">
                 <div className="relative w-12 h-12">
                   <Image
-                    src="/assets/logo/ACE-LOGO.svg"
+                    src="/assets/logo/ACE-LOGO(2).svg"
                     alt="ACE Logo"
                     fill
                     className="object-contain drop-shadow-[0_0_15px_rgba(255,42,109,0.5)]"

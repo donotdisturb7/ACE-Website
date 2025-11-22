@@ -75,9 +75,9 @@ export default function LoginPage() {
         <div className="w-full max-w-md relative z-10">
           {/* Logo/Brand */}
           <div className="text-center mb-8">
-            <Link href="/" className="inline-block relative w-32 h-32 hover:scale-105 transition-transform duration-300">
+            <Link href="/" className="inline-block relative w-48 h-48 hover:scale-105 transition-transform duration-300">
               <Image
-                src="/assets/logo/ACE-LOGO.svg"
+                src="/assets/logo/ACE-LOGO(2).svg"
                 alt="ACE 2025"
                 fill
                 className="object-contain drop-shadow-[0_0_25px_rgba(255,42,109,0.6)]"

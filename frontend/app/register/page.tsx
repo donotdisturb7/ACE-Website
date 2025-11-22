@@ -108,9 +108,9 @@ export default function RegisterPage() {
 
         <div className="w-full max-w-3xl relative z-10">
           <div className="text-center mb-10">
-            <Link href="/" className="inline-block relative w-24 h-24 mb-6 hover:scale-105 transition-transform duration-300">
+            <Link href="/" className="inline-block relative w-40 h-40 mb-6 hover:scale-105 transition-transform duration-300">
               <Image
-                src="/assets/logo/ACE-LOGO.svg"
+                src="/assets/logo/ACE-LOGO(2).svg"
                 alt="ACE 2025"
                 fill
                 className="object-contain drop-shadow-[0_0_25px_rgba(255,42,109,0.6)]"
