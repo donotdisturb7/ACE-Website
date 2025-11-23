@@ -35,15 +35,15 @@ export function useAdminActions(
     }
   };
 
-  const handleStartSession = async (roomNumber: number) => {
+  const handleUpdateRoomName = async (roomNumber: number, name: string) => {
     try {
-      await api.post('/admin/sessions/start', { roomNumber });
+      await api.post('/admin/rooms/names', { roomNumber, name });
     } catch (error) {
-      console.error('Error starting session:', error);
+      console.error('Error updating room name:', error);
       throw error;
     }
   };
 
-  return { handleExportCSV, handleAssignRoom, handleStartSession };
+  return { handleExportCSV, handleAssignRoom, handleUpdateRoomName };
 }
 

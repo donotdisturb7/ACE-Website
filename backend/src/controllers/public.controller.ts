@@ -12,15 +12,29 @@ export class PublicController {
         order: [['currentScore', 'DESC'], ['rank', 'ASC']],
       });
 
+      // Charger les noms des salles
+      const fs = require('fs');
+      const path = require('path');
+      const roomsFile = path.join(__dirname, '../../data/rooms.json');
+      let roomNames = {};
+
+      if (fs.existsSync(roomsFile)) {
+        try {
+          roomNames = JSON.parse(fs.readFileSync(roomsFile, 'utf8'));
+        } catch (e) {
+          logger.error('Error reading rooms file:', e);
+        }
+      }
+
       res.json({
         success: true,
-        data: { teams },
+        data: { teams, roomNames },
       });
     } catch (error) {
       logger.error('Get public leaderboard error:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'Erreur lors de la récupération du classement.' 
+      res.status(500).json({
+        success: false,
+        message: 'Erreur lors de la récupération du classement.'
       });
     }
   }

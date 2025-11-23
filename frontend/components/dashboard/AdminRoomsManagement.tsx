@@ -1,4 +1,5 @@
-import { MapPin, Play } from 'lucide-react';
+import { useState } from 'react';
+import { MapPin, Edit2, Check, X } from 'lucide-react';
 
 interface AdminTeam {
   id: string;
@@ -13,14 +14,31 @@ interface AdminTeam {
 interface AdminRoomsManagementProps {
   teams: AdminTeam[];
   onAssignRoom: (teamId: string, roomNumber: number) => void;
-  onStartSession: (roomNumber: number) => void;
+  roomNames: Record<number, string>;
+  onUpdateRoomName: (roomNumber: number, name: string) => void;
 }
 
-export default function AdminRoomsManagement({ 
-  teams, 
-  onAssignRoom, 
-  onStartSession 
+export default function AdminRoomsManagement({
+  teams,
+  onAssignRoom,
+  roomNames,
+  onUpdateRoomName
 }: AdminRoomsManagementProps) {
+  const [editingRoom, setEditingRoom] = useState<number | null>(null);
+  const [editName, setEditName] = useState('');
+
+  const startEditing = (roomNum: number, currentName: string) => {
+    setEditingRoom(roomNum);
+    setEditName(currentName);
+  };
+
+  const saveRoomName = (roomNum: number) => {
+    if (editName.trim()) {
+      onUpdateRoomName(roomNum, editName.trim());
+    }
+    setEditingRoom(null);
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="font-display text-2xl font-bold text-white">Gestion des Salles</h2>
@@ -28,20 +46,46 @@ export default function AdminRoomsManagement({
       <div className="grid md:grid-cols-2 gap-6">
         {[1, 2, 3, 4].map((roomNum) => {
           const roomTeams = teams.filter((t) => t.roomNumber === roomNum);
+          const roomName = roomNames[roomNum] || `Salle ${roomNum}`;
+          const isEditing = editingRoom === roomNum;
+
           return (
             <div key={roomNum} className="glass-panel p-6 rounded-2xl border border-white/10">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-display text-xl font-bold text-white flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-purple-400" />
-                  Salle {roomNum}
-                </h3>
-                <button
-                  onClick={() => onStartSession(roomNum)}
-                  className="flex items-center gap-2 px-4 py-2 bg-sky-aqua hover:bg-sky-aqua/90 text-white font-medium rounded-xl transition-all"
-                >
-                  <Play className="w-4 h-4" />
-                  Démarrer
-                </button>
+                {isEditing ? (
+                  <div className="flex items-center gap-2 flex-1 mr-4">
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="flex-1 bg-surface border border-white/20 rounded px-3 py-1 text-white focus:outline-none focus:border-neon-rose"
+                      autoFocus
+                    />
+                    <button
+                      onClick={() => saveRoomName(roomNum)}
+                      className="p-1 hover:bg-green-500/20 text-green-400 rounded"
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setEditingRoom(null)}
+                      className="p-1 hover:bg-red-500/20 text-red-400 rounded"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <h3 className="font-display text-xl font-bold text-white flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-purple-400" />
+                    {roomName}
+                    <button
+                      onClick={() => startEditing(roomNum, roomName)}
+                      className="ml-2 p-1 text-gray-400 hover:text-white transition-colors"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </button>
+                  </h3>
+                )}
               </div>
 
               <div className="space-y-2 mb-4">

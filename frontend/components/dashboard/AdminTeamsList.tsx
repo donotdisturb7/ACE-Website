@@ -10,9 +10,10 @@ interface AdminTeam {
 
 interface AdminTeamsListProps {
   teams: AdminTeam[];
+  roomNames?: Record<string, string>;
 }
 
-export default function AdminTeamsList({ teams }: AdminTeamsListProps) {
+export default function AdminTeamsList({ teams, roomNames = {} }: AdminTeamsListProps) {
   return (
     <div className="space-y-6">
       <h2 className="font-display text-2xl font-bold text-white">
@@ -53,7 +54,9 @@ export default function AdminTeamsList({ teams }: AdminTeamsListProps) {
                       <span className="text-yellow-400">Incomplète</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-gray-300">{team.roomNumber || '-'}</td>
+                  <td className="px-6 py-4 text-gray-300">
+                    {team.roomNumber ? (roomNames[team.roomNumber] || `Salle ${team.roomNumber}`) : '-'}
+                  </td>
                   <td className="px-6 py-4 font-bold text-white">
                     {team.currentScore} pts
                     {team.rank && <span className="text-gray-400 ml-2">#{team.rank}</span>}

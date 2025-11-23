@@ -21,8 +21,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, loading: authLoading, logout, updateUser } = useAuth();
   const { team, loading: teamLoading, setTeam } = useTeamData();
-  const { stats, teams: allTeams, loading: adminLoading, updateTeam } = useAdminData(user?.isAdmin ?? false);
-  const { handleExportCSV, handleAssignRoom, handleStartSession } = useAdminActions(allTeams, updateTeam);
+  const { stats, teams: allTeams, roomNames, loading: adminLoading, updateTeam, setRoomNames } = useAdminData(user?.isAdmin ?? false);
+  const { handleExportCSV, handleAssignRoom, handleUpdateRoomName } = useAdminActions(allTeams, updateTeam);
   const [activeTab, setActiveTab] = useState<'team' | 'stats' | 'teams' | 'rooms'>('team');
   const [leavingTeam, setLeavingTeam] = useState(false);
   const [redirectingToCTFd, setRedirectingToCTFd] = useState(false);
@@ -39,18 +39,16 @@ export default function DashboardPage() {
     try {
       await handleAssignRoom(teamId, roomNumber);
     } catch {
-      alert('Erreur lors de l&apos;assignation');
+      alert('Erreur lors de l\'assignation');
     }
   };
 
-  const handleStartSessionWithConfirm = async (roomNumber: number) => {
-    if (!confirm(`Démarrer la session pour la salle ${roomNumber} ?`)) return;
+  const handleUpdateRoomNameWithAlert = async (roomNumber: number, name: string) => {
     try {
-      await handleStartSession(roomNumber);
-      alert(`Session démarrée pour la salle ${roomNumber}`);
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      alert(err.response?.data?.message || 'Erreur lors du démarrage');
+      await handleUpdateRoomName(roomNumber, name);
+      setRoomNames(prev => ({ ...prev, [roomNumber]: name }));
+    } catch {
+      alert('Erreur lors de la mise à jour du nom');
     }
   };
 
@@ -147,7 +145,7 @@ export default function DashboardPage() {
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-aqua/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-neon-rose/5 blur-[120px] rounded-full pointer-events-none" />
 
-      <DashboardHeader user={user} onLogout={logout} />
+      <DashboardHeader user={user} onLogout={logout} teamScore={team?.currentScore} />
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row items-start justify-between gap-4 mb-8">
@@ -189,15 +187,16 @@ export default function DashboardPage() {
 
         {/* All Teams Tab */}
         {activeTab === 'teams' && user.isAdmin && (
-          <AdminTeamsList teams={allTeams} />
+          <AdminTeamsList teams={allTeams} roomNames={roomNames} />
         )}
 
         {/* Rooms Tab */}
         {activeTab === 'rooms' && user.isAdmin && (
-          <AdminRoomsManagement 
-            teams={allTeams} 
+          <AdminRoomsManagement
+            teams={allTeams}
+            roomNames={roomNames}
             onAssignRoom={handleAssignRoomWithAlert}
-            onStartSession={handleStartSessionWithConfirm}
+            onUpdateRoomName={handleUpdateRoomNameWithAlert}
           />
         )}
 
@@ -216,9 +215,9 @@ export default function DashboardPage() {
                   <Users className="w-6 h-6 text-purple-500" />
                   Statut de l&apos;équipe
                 </h3>
-                <TeamSection 
-                  team={team} 
-                  userId={user.id} 
+                <TeamSection
+                  team={team}
+                  userId={user.id}
                   onLeaveTeam={handleLeaveTeam}
                   leavingTeam={leavingTeam}
                 />

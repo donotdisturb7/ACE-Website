@@ -149,7 +149,7 @@ export class AdminController {
 
       for (const assignment of assignments) {
         await Team.update(
-          { roomNumber: assignment.roomNumber },
+          { roomNumber: assignment.roomNumber === 0 ? null : assignment.roomNumber },
           { where: { id: assignment.teamId } }
         );
       }
@@ -166,60 +166,74 @@ export class AdminController {
     }
   }
 
-  // Démarrer une session pour une salle
-  async startSession(req: AuthRequest, res: Response): Promise<void> {
+  // Gestion des noms de salles
+  async getRoomNames(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const { roomNumber } = req.body;
+      const fs = require('fs');
+      const path = require('path');
+      const roomsFile = path.join(__dirname, '../../data/rooms.json');
 
-      const teams = await Team.findAll({ where: { roomNumber } });
-
-      if (teams.length === 0) {
-        res.status(404).json({ success: false, message: 'Aucune équipe assignée à cette salle.' });
+      if (!fs.existsSync(roomsFile)) {
+        // Créer le dossier data s'il n'existe pas
+        const dataDir = path.dirname(roomsFile);
+        if (!fs.existsSync(dataDir)) {
+          fs.mkdirSync(dataDir, { recursive: true });
+        }
+        fs.writeFileSync(roomsFile, JSON.stringify({}));
+        res.json({ success: true, data: {} });
         return;
       }
 
-      const startTime = new Date();
-      const endTime = new Date(startTime.getTime() + 90 * 60 * 1000); // 90 minutes
-
-      for (const team of teams) {
-        team.sessionStartTime = startTime;
-        team.sessionEndTime = endTime;
-        await team.save();
-      }
-
-      logger.info(`Session started for room ${roomNumber}`);
-
-      res.json({
-        success: true,
-        message: `Session démarrée pour la salle ${roomNumber}.`,
-        data: { startTime, endTime },
-      });
+      const data = fs.readFileSync(roomsFile, 'utf8');
+      res.json({ success: true, data: JSON.parse(data) });
     } catch (error) {
-      logger.error('Start session error:', error);
-      res.status(500).json({ success: false, message: 'Erreur lors du démarrage de la session.' });
+      logger.error('Get room names error:', error);
+      res.status(500).json({ success: false, message: 'Erreur lors de la récupération des noms de salles.' });
     }
   }
 
-  // Arrêter une session pour une salle
-  async stopSession(req: AuthRequest, res: Response): Promise<void> {
+  async updateRoomName(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const { roomNumber } = req.body;
+      const { roomNumber, name } = req.body;
 
-      await Team.update(
-        { sessionStartTime: null, sessionEndTime: null },
-        { where: { roomNumber } }
-      );
+      if (!roomNumber || !name) {
+        res.status(400).json({ success: false, message: 'Numéro de salle et nom requis.' });
+        return;
+      }
 
-      logger.info(`Session stopped for room ${roomNumber}`);
+      const fs = require('fs');
+      const path = require('path');
+      const roomsFile = path.join(__dirname, '../../data/rooms.json');
 
-      res.json({
-        success: true,
-        message: `Session arrêtée pour la salle ${roomNumber}.`,
-      });
+      // Créer le dossier data s'il n'existe pas
+      const dataDir = path.dirname(roomsFile);
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+
+      let rooms = {};
+      if (fs.existsSync(roomsFile)) {
+        rooms = JSON.parse(fs.readFileSync(roomsFile, 'utf8'));
+      }
+
+      rooms[roomNumber] = name;
+      fs.writeFileSync(roomsFile, JSON.stringify(rooms, null, 2));
+
+      res.json({ success: true, message: 'Nom de salle mis à jour.' });
     } catch (error) {
-      logger.error('Stop session error:', error);
-      res.status(500).json({ success: false, message: 'Erreur lors de l\'arrêt de la session.' });
+      logger.error('Update room name error:', error);
+      res.status(500).json({ success: false, message: 'Erreur lors de la mise à jour du nom de salle.' });
     }
+  }
+
+  // Démarrer une session (OBSOLÈTE)
+  async startSession(req: AuthRequest, res: Response): Promise<void> {
+    res.json({ success: true, message: 'Fonctionnalité désactivée.' });
+  }
+
+  // Arrêter une session (OBSOLÈTE)
+  async stopSession(req: AuthRequest, res: Response): Promise<void> {
+    res.json({ success: true, message: 'Fonctionnalité désactivée.' });
   }
 
   // Liste de toutes les équipes
@@ -345,4 +359,3 @@ export class AdminController {
 }
 
 export default new AdminController();
-

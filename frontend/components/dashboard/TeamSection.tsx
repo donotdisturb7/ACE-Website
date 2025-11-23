@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
-import { 
-  Users, 
-  Trophy, 
-  Key, 
-  PlusCircle, 
-  UserPlus, 
+import {
+  Users,
+  Trophy,
+  Key,
+  PlusCircle,
+  UserPlus,
   MapPin,
   Copy,
   Check,
@@ -37,7 +37,7 @@ export default function TeamSection({ team, userId, onLeaveTeam, leavingTeam }: 
         <p className="text-gray-400 mb-8 max-w-md mx-auto">
           Pour participer à l&apos;opération, vous devez rejoindre une équipe existante ou en former une nouvelle.
         </p>
-        
+
         <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto">
           <Link
             href="/team/create"
@@ -78,7 +78,7 @@ export default function TeamSection({ team, userId, onLeaveTeam, leavingTeam }: 
           <div className="flex items-center gap-3 mt-2">
             <span className={clsx(
               "px-2 py-0.5 rounded text-xs font-medium border",
-              team.isComplete 
+              team.isComplete
                 ? "bg-green-500/10 border-green-500/30 text-green-400"
                 : "bg-yellow-500/10 border-yellow-500/30 text-yellow-400"
             )}>
@@ -87,7 +87,7 @@ export default function TeamSection({ team, userId, onLeaveTeam, leavingTeam }: 
             <span className="text-gray-400 text-sm">{team.memberCount} / 5 Agents</span>
           </div>
         </div>
-        
+
         {team.roomNumber && (
           <div className="px-4 py-2 bg-purple-500/20 border border-purple-500/50 rounded-lg flex items-center gap-2">
             <MapPin className="w-5 h-5 text-purple-400" />
@@ -148,8 +148,8 @@ export default function TeamSection({ team, userId, onLeaveTeam, leavingTeam }: 
               key={member.id}
               className={clsx(
                 "flex items-center justify-between p-4 rounded-xl border transition-all",
-                member.id === userId 
-                  ? "bg-white/10 border-white/20" 
+                member.id === userId
+                  ? "bg-white/10 border-white/20"
                   : "bg-surface border-white/5 hover:border-white/10"
               )}
             >
@@ -184,18 +184,16 @@ export default function TeamSection({ team, userId, onLeaveTeam, leavingTeam }: 
           ))}
         </div>
       </div>
-      
-      {team.currentScore > 0 && (
-        <div className="mt-6 p-4 bg-gradient-to-r from-neon-rose/10 to-purple-500/10 border border-neon-rose/20 rounded-xl flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Trophy className="w-6 h-6 text-yellow-500" />
-            <span className="font-bold text-white">Score Actuel</span>
-          </div>
-          <div className="text-2xl font-mono font-bold text-white">
-            {team.currentScore} <span className="text-sm text-gray-400 font-sans font-normal">pts</span>
-          </div>
+
+      <div className="mt-6 p-4 bg-gradient-to-r from-neon-rose/10 to-purple-500/10 border border-neon-rose/20 rounded-xl flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Trophy className="w-6 h-6 text-yellow-500" />
+          <span className="font-bold text-white">Score Actuel</span>
         </div>
-      )}
+        <div className="text-2xl font-mono font-bold text-white">
+          {team.currentScore} <span className="text-sm text-gray-400 font-sans font-normal">pts</span>
+        </div>
+      </div>
 
       {/* Leave/Delete Team Button */}
       <div className="mt-8 pt-6 border-t border-white/10">

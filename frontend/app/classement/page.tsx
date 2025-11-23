@@ -15,6 +15,7 @@ interface TeamScore {
 
 export default function ClassementPage() {
   const [teams, setTeams] = useState<TeamScore[]>([]);
+  const [roomNames, setRoomNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +37,7 @@ export default function ClassementPage() {
       const response = await api.get('/public/leaderboard');
       if (response.data.success) {
         setTeams(response.data.data.teams || []);
+        setRoomNames(response.data.data.roomNames || {});
       } else {
         setError('Erreur lors du chargement du classement');
       }
@@ -145,7 +147,7 @@ export default function ClassementPage() {
                         <td className="py-4 px-6 text-center">
                           {team.roomNumber ? (
                             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-midnight-blue text-sky-aqua border border-sky-aqua/30">
-                              Salle {team.roomNumber}
+                              {roomNames[team.roomNumber] || `Salle ${team.roomNumber}`}
                             </span>
                           ) : (
                             <span className="text-gray-500 text-sm">-</span>

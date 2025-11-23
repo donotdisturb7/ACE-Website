@@ -25,6 +25,7 @@ export interface AdminTeam {
 export function useAdminData(isAdmin: boolean) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [teams, setTeams] = useState<AdminTeam[]>([]);
+  const [roomNames, setRoomNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,13 +38,15 @@ export function useAdminData(isAdmin: boolean) {
     const fetchData = async () => {
       try {
         setError(null);
-        const [statsRes, teamsRes] = await Promise.all([
+        const [statsRes, teamsRes, roomsRes] = await Promise.all([
           api.get('/admin/stats'),
           api.get('/admin/teams'),
+          api.get('/admin/rooms/names'),
         ]);
 
         if (statsRes.data.success) setStats(statsRes.data.data);
         if (teamsRes.data.success) setTeams(teamsRes.data.data.teams);
+        if (roomsRes.data.success) setRoomNames(roomsRes.data.data);
       } catch (err) {
         console.error('Error fetching admin data:', err);
         setError('Erreur lors du chargement des données');
@@ -59,6 +62,6 @@ export function useAdminData(isAdmin: boolean) {
     setTeams(teams.map(t => t.id === teamId ? { ...t, ...updates } : t));
   };
 
-  return { stats, teams, loading, error, updateTeam, setTeams };
+  return { stats, teams, roomNames, loading, error, updateTeam, setTeams, setRoomNames };
 }
 

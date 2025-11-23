@@ -1,33 +1,46 @@
 import Link from 'next/link';
 import { Terminal, LogOut, Shield } from 'lucide-react';
 
-interface DashboardHeaderProps {
-  user: {
-    firstName: string;
-    isAdmin: boolean;
-  };
-  onLogout: () => void;
+interface User {
+  firstName: string;
+  isAdmin: boolean;
 }
 
-export default function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
+interface DashboardHeaderProps {
+  user: User;
+  onLogout: () => void;
+  teamScore?: number;
+}
+
+export default function DashboardHeader({ user, onLogout, teamScore }: DashboardHeaderProps) {
   return (
-    <nav className="border-b border-white/10 bg-deep-navy/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="container mx-auto px-4 h-16 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-neon-rose rounded-lg flex items-center justify-center shadow-neon">
-            <Terminal className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-display text-xl font-bold text-white tracking-wider">
-            ACE<span className="text-sky-aqua">2025</span>
-          </span>
+    <header className="border-b border-white/10 bg-deep-navy/50 backdrop-blur-md sticky top-0 z-50">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-8">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded bg-gradient-to-br from-neon-rose to-purple-600 flex items-center justify-center font-display font-bold text-white group-hover:scale-105 transition-transform">
+              A
+            </div>
+            <span className="font-display font-bold text-white text-lg tracking-wide group-hover:text-neon-rose transition-colors">
+              ACE<span className="text-neon-rose">2025</span>
+            </span>
+          </Link>
+
+          {/* Score Display in Header */}
+          {teamScore !== undefined && (
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
+              <span className="text-xs text-gray-400 uppercase font-bold">Score</span>
+              <span className="font-mono font-bold text-neon-rose">{teamScore}</span>
+            </div>
+          )}
         </div>
-        
+
         <div className="flex items-center gap-6">
           <div className="hidden md:flex items-center gap-3 px-4 py-1.5 bg-white/5 rounded-full border border-white/10">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             <span className="text-xs font-mono text-gray-400">SYSTÈME EN LIGNE</span>
           </div>
-          
+
           <div className="flex items-center gap-4">
             {user.isAdmin && (
               <div className="flex items-center gap-2 px-3 py-1.5 bg-neon-rose/20 text-neon-rose border border-neon-rose/50 rounded-lg">
@@ -45,7 +58,7 @@ export default function DashboardHeader({ user, onLogout }: DashboardHeaderProps
           </div>
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
 
