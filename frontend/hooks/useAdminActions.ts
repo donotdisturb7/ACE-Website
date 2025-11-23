@@ -44,6 +44,24 @@ export function useAdminActions(
     }
   };
 
-  return { handleExportCSV, handleAssignRoom, handleUpdateRoomName };
+  const handleAddRoom = async () => {
+    try {
+      await api.post('/admin/rooms');
+    } catch (error) {
+      console.error('Error adding room:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteRoom = async (roomNumber: number) => {
+    try {
+      await api.delete(`/admin/rooms/${roomNumber}`);
+    } catch (error) {
+      console.error('Error deleting room:', error);
+      throw error;
+    }
+  };
+
+  return { handleExportCSV, handleAssignRoom, handleUpdateRoomName, handleAddRoom, handleDeleteRoom };
 }
 

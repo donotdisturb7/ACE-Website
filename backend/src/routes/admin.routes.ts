@@ -14,7 +14,7 @@ const assignRoomsSchema = z.object({
   assignments: z.array(
     z.object({
       teamId: z.string().uuid(),
-      roomNumber: z.number().min(0).max(4),
+      roomNumber: z.number().min(0),
     })
   ),
 });
@@ -34,6 +34,8 @@ router.get('/export/csv', adminController.exportCSV);
 router.post('/rooms/assign', validate(assignRoomsSchema), adminController.assignRooms);
 router.get('/rooms/names', adminController.getRoomNames);
 router.post('/rooms/names', adminController.updateRoomName);
+router.post('/rooms', adminController.addRoom);
+router.delete('/rooms/:roomNumber', adminController.deleteRoom);
 
 // Gestion des utilisateurs et équipes
 router.put('/users/:userId', adminController.updateUser);

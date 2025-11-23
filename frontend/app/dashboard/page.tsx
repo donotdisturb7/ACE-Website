@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const { user, loading: authLoading, logout, updateUser } = useAuth();
   const { team, loading: teamLoading, setTeam } = useTeamData();
   const { stats, teams: allTeams, roomNames, loading: adminLoading, updateTeam, setRoomNames } = useAdminData(user?.isAdmin ?? false);
-  const { handleExportCSV, handleAssignRoom, handleUpdateRoomName } = useAdminActions(allTeams, updateTeam);
+  const { handleExportCSV, handleAssignRoom, handleUpdateRoomName, handleAddRoom, handleDeleteRoom } = useAdminActions(allTeams, updateTeam);
   const [activeTab, setActiveTab] = useState<'team' | 'stats' | 'teams' | 'rooms'>('team');
   const [leavingTeam, setLeavingTeam] = useState(false);
   const [redirectingToCTFd, setRedirectingToCTFd] = useState(false);
@@ -49,6 +49,30 @@ export default function DashboardPage() {
       setRoomNames(prev => ({ ...prev, [roomNumber]: name }));
     } catch {
       alert('Erreur lors de la mise à jour du nom');
+    }
+  };
+
+  const handleAddRoomWithAlert = async () => {
+    try {
+      await handleAddRoom();
+      // Refresh data to get new room
+      window.location.reload(); // Simple reload for now, ideally should just refetch
+    } catch {
+      alert('Erreur lors de l\'ajout de la salle');
+    }
+  };
+
+  const handleDeleteRoomWithConfirm = async (roomNumber: number) => {
+    if (!confirm(`Supprimer la salle ${roomNumber} ? Les équipes seront désassignées.`)) return;
+    try {
+      await handleDeleteRoom(roomNumber);
+      setRoomNames(prev => {
+        const newRooms = { ...prev };
+        delete newRooms[roomNumber];
+        return newRooms;
+      });
+    } catch {
+      alert('Erreur lors de la suppression');
     }
   };
 
@@ -197,6 +221,8 @@ export default function DashboardPage() {
             roomNames={roomNames}
             onAssignRoom={handleAssignRoomWithAlert}
             onUpdateRoomName={handleUpdateRoomNameWithAlert}
+            onAddRoom={handleAddRoomWithAlert}
+            onDeleteRoom={handleDeleteRoomWithConfirm}
           />
         )}
 

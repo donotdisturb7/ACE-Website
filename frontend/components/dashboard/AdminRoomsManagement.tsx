@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MapPin, Edit2, Check, X } from 'lucide-react';
+import { MapPin, Edit2, Check, X, Plus, Trash2 } from 'lucide-react';
 
 interface AdminTeam {
   id: string;
@@ -16,13 +16,17 @@ interface AdminRoomsManagementProps {
   onAssignRoom: (teamId: string, roomNumber: number) => void;
   roomNames: Record<number, string>;
   onUpdateRoomName: (roomNumber: number, name: string) => void;
+  onAddRoom: () => void;
+  onDeleteRoom: (roomNumber: number) => void;
 }
 
 export default function AdminRoomsManagement({
   teams,
   onAssignRoom,
   roomNames,
-  onUpdateRoomName
+  onUpdateRoomName,
+  onAddRoom,
+  onDeleteRoom
 }: AdminRoomsManagementProps) {
   const [editingRoom, setEditingRoom] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
@@ -39,18 +43,30 @@ export default function AdminRoomsManagement({
     setEditingRoom(null);
   };
 
+  // Convert roomNames keys to numbers and sort them
+  const sortedRoomNumbers = Object.keys(roomNames).map(Number).sort((a, b) => a - b);
+
   return (
     <div className="space-y-6">
-      <h2 className="font-display text-2xl font-bold text-white">Gestion des Salles</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="font-display text-2xl font-bold text-white">Gestion des Salles</h2>
+        <button
+          onClick={onAddRoom}
+          className="flex items-center gap-2 px-4 py-2 bg-neon-rose hover:bg-neon-rose/90 text-white font-bold rounded-xl transition-all"
+        >
+          <Plus className="w-5 h-5" />
+          Ajouter une salle
+        </button>
+      </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {[1, 2, 3, 4].map((roomNum) => {
+        {sortedRoomNumbers.map((roomNum) => {
           const roomTeams = teams.filter((t) => t.roomNumber === roomNum);
           const roomName = roomNames[roomNum] || `Salle ${roomNum}`;
           const isEditing = editingRoom === roomNum;
 
           return (
-            <div key={roomNum} className="glass-panel p-6 rounded-2xl border border-white/10">
+            <div key={roomNum} className="glass-panel p-6 rounded-2xl border border-white/10 relative group">
               <div className="flex justify-between items-center mb-4">
                 {isEditing ? (
                   <div className="flex items-center gap-2 flex-1 mr-4">
@@ -75,16 +91,25 @@ export default function AdminRoomsManagement({
                     </button>
                   </div>
                 ) : (
-                  <h3 className="font-display text-xl font-bold text-white flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-purple-400" />
-                    {roomName}
+                  <div className="flex items-center justify-between w-full">
+                    <h3 className="font-display text-xl font-bold text-white flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-purple-400" />
+                      {roomName}
+                      <button
+                        onClick={() => startEditing(roomNum, roomName)}
+                        className="ml-2 p-1 text-gray-400 hover:text-white transition-colors"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                      </button>
+                    </h3>
                     <button
-                      onClick={() => startEditing(roomNum, roomName)}
-                      className="ml-2 p-1 text-gray-400 hover:text-white transition-colors"
+                      onClick={() => onDeleteRoom(roomNum)}
+                      className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                      title="Supprimer la salle"
                     >
-                      <Edit2 className="w-3 h-3" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
-                  </h3>
+                  </div>
                 )}
               </div>
 

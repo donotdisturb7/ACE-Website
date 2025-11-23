@@ -179,8 +179,15 @@ export class AdminController {
         if (!fs.existsSync(dataDir)) {
           fs.mkdirSync(dataDir, { recursive: true });
         }
-        fs.writeFileSync(roomsFile, JSON.stringify({}));
-        res.json({ success: true, data: {} });
+        // Initialiser avec 4 salles par défaut pour la rétrocompatibilité
+        const defaultRooms = {
+          "1": "Salle 1",
+          "2": "Salle 2",
+          "3": "Salle 3",
+          "4": "Salle 4"
+        };
+        fs.writeFileSync(roomsFile, JSON.stringify(defaultRooms, null, 2));
+        res.json({ success: true, data: defaultRooms });
         return;
       }
 
@@ -223,6 +230,69 @@ export class AdminController {
     } catch (error) {
       logger.error('Update room name error:', error);
       res.status(500).json({ success: false, message: 'Erreur lors de la mise à jour du nom de salle.' });
+    }
+  }
+
+  async addRoom(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const roomsFile = path.join(__dirname, '../../data/rooms.json');
+
+      let rooms: Record<string, string> = {};
+      if (fs.existsSync(roomsFile)) {
+        rooms = JSON.parse(fs.readFileSync(roomsFile, 'utf8'));
+      }
+
+      // Trouver le prochain ID disponible
+      const existingIds = Object.keys(rooms).map(Number);
+      const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+
+      rooms[nextId.toString()] = `Salle ${nextId}`;
+      fs.writeFileSync(roomsFile, JSON.stringify(rooms, null, 2));
+
+      res.json({ success: true, message: 'Salle ajoutée.', data: { id: nextId, name: rooms[nextId.toString()] } });
+    } catch (error) {
+      logger.error('Add room error:', error);
+      res.status(500).json({ success: false, message: 'Erreur lors de l\'ajout de la salle.' });
+    }
+  }
+
+  async deleteRoom(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { roomNumber } = req.params;
+      const roomNum = parseInt(roomNumber);
+
+      const fs = require('fs');
+      const path = require('path');
+      const roomsFile = path.join(__dirname, '../../data/rooms.json');
+
+      if (!fs.existsSync(roomsFile)) {
+        res.status(404).json({ success: false, message: 'Aucune salle trouvée.' });
+        return;
+      }
+
+      let rooms = JSON.parse(fs.readFileSync(roomsFile, 'utf8'));
+
+      if (!rooms[roomNumber]) {
+        res.status(404).json({ success: false, message: 'Salle non trouvée.' });
+        return;
+      }
+
+      // Supprimer la salle du fichier
+      delete rooms[roomNumber];
+      fs.writeFileSync(roomsFile, JSON.stringify(rooms, null, 2));
+
+      // Désassigner les équipes de cette salle
+      await Team.update(
+        { roomNumber: null },
+        { where: { roomNumber: roomNum } }
+      );
+
+      res.json({ success: true, message: 'Salle supprimée et équipes désassignées.' });
+    } catch (error) {
+      logger.error('Delete room error:', error);
+      res.status(500).json({ success: false, message: 'Erreur lors de la suppression de la salle.' });
     }
   }
 
