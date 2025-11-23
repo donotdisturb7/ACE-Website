@@ -8,12 +8,29 @@ export class CTFdController {
   // Synchroniser les scores depuis CTFd
   async syncScores(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const teams = await Team.findAll({
-        attributes: ['id', 'ctfdTeamId'],
-        where: { ctfdTeamId: { $ne: null } },
-      });
+      const { scores } = req.body;
 
-      await ctfdService.syncAllScores(teams as any);
+      if (!scores || !Array.isArray(scores)) {
+        res.status(400).json({ success: false, message: 'Invalid scores data' });
+        return;
+      }
+
+      logger.info(`Received ${scores.length} scores from CTFd`);
+
+      // Mettre à jour chaque équipe
+      for (const scoreData of scores) {
+        const { teamId, score, rank } = scoreData;
+
+        await Team.update(
+          {
+            currentScore: score,
+            rank: rank,
+          },
+          { where: { id: teamId } }
+        );
+      }
+
+      logger.info(`Updated ${scores.length} team scores`);
 
       res.json({
         success: true,
