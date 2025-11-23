@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Terminal, LogOut, Shield } from 'lucide-react';
 
 interface User {
@@ -18,8 +19,13 @@ export default function DashboardHeader({ user, onLogout, teamScore }: Dashboard
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded bg-gradient-to-br from-neon-rose to-purple-600 flex items-center justify-center font-display font-bold text-white group-hover:scale-105 transition-transform">
-              A
+            <div className="relative w-10 h-10 group-hover:scale-105 transition-transform">
+              <Image
+                src="/assets/logo/ACE-LOGO(2).svg"
+                alt="ACE Logo"
+                fill
+                className="object-contain"
+              />
             </div>
             <span className="font-display font-bold text-white text-lg tracking-wide group-hover:text-neon-rose transition-colors">
               ACE<span className="text-neon-rose">2025</span>
@@ -61,4 +67,3 @@ export default function DashboardHeader({ user, onLogout, teamScore }: Dashboard
     </header>
   );
 }
-

@@ -16,6 +16,7 @@ import AdminStats from '@/components/dashboard/AdminStats';
 import AdminTeamsList from '@/components/dashboard/AdminTeamsList';
 import AdminRoomsManagement from '@/components/dashboard/AdminRoomsManagement';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -26,6 +27,12 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<'team' | 'stats' | 'teams' | 'rooms'>('team');
   const [leavingTeam, setLeavingTeam] = useState(false);
   const [redirectingToCTFd, setRedirectingToCTFd] = useState(false);
+
+  // Modal State
+  const [deleteRoomModal, setDeleteRoomModal] = useState<{ isOpen: boolean; roomNumber: number | null }>({
+    isOpen: false,
+    roomNumber: null
+  });
 
   const loading = teamLoading || (user?.isAdmin && adminLoading);
 
@@ -54,16 +61,23 @@ export default function DashboardPage() {
 
   const handleAddRoomWithAlert = async () => {
     try {
-      await handleAddRoom();
-      // Refresh data to get new room
-      window.location.reload(); // Simple reload for now, ideally should just refetch
+      const newRoom = await handleAddRoom();
+      if (newRoom) {
+        setRoomNames(prev => ({ ...prev, [newRoom.id]: newRoom.name }));
+      }
     } catch {
       alert('Erreur lors de l\'ajout de la salle');
     }
   };
 
-  const handleDeleteRoomWithConfirm = async (roomNumber: number) => {
-    if (!confirm(`Supprimer la salle ${roomNumber} ? Les équipes seront désassignées.`)) return;
+  const handleDeleteRoomClick = (roomNumber: number) => {
+    setDeleteRoomModal({ isOpen: true, roomNumber });
+  };
+
+  const confirmDeleteRoom = async () => {
+    const roomNumber = deleteRoomModal.roomNumber;
+    if (!roomNumber) return;
+
     try {
       await handleDeleteRoom(roomNumber);
       setRoomNames(prev => {
@@ -222,9 +236,19 @@ export default function DashboardPage() {
             onAssignRoom={handleAssignRoomWithAlert}
             onUpdateRoomName={handleUpdateRoomNameWithAlert}
             onAddRoom={handleAddRoomWithAlert}
-            onDeleteRoom={handleDeleteRoomWithConfirm}
+            onDeleteRoom={handleDeleteRoomClick}
           />
         )}
+
+        <ConfirmationModal
+          isOpen={deleteRoomModal.isOpen}
+          onClose={() => setDeleteRoomModal({ isOpen: false, roomNumber: null })}
+          onConfirm={confirmDeleteRoom}
+          title="Supprimer la salle ?"
+          message={`Êtes-vous sûr de vouloir supprimer la salle ${deleteRoomModal.roomNumber} ? Toutes les équipes assignées à cette salle seront désassignées. Cette action est irréversible.`}
+          confirmText="Supprimer"
+          isDanger={true}
+        />
 
         {/* Team Tab (default) */}
         {activeTab === 'team' && (

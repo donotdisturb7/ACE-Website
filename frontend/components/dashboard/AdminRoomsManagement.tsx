@@ -104,7 +104,7 @@ export default function AdminRoomsManagement({
                     </h3>
                     <button
                       onClick={() => onDeleteRoom(roomNum)}
-                      className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                      className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                       title="Supprimer la salle"
                     >
                       <Trash2 className="w-4 h-4" />

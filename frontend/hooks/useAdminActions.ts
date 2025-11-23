@@ -46,7 +46,8 @@ export function useAdminActions(
 
   const handleAddRoom = async () => {
     try {
-      await api.post('/admin/rooms');
+      const response = await api.post('/admin/rooms');
+      return response.data.data; // { id: number, name: string }
     } catch (error) {
       console.error('Error adding room:', error);
       throw error;
