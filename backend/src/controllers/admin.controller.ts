@@ -15,7 +15,7 @@ export class AdminController {
       const totalTeams = await Team.count();
       const completeTeams = await Team.count({ where: { isComplete: true } });
 
-      // Répartition par lycée
+      // Répartition par établissement
       const schoolDistribution = await User.findAll({
         attributes: ['school', [User.sequelize!.fn('COUNT', 'id'), 'count']],
         group: ['school'],
@@ -380,7 +380,16 @@ export class AdminController {
         return;
       }
 
-      await user.update(updates);
+      // Sécurité : Filtrer les champs autorisés (Mass Assignment Protection)
+      const allowedFields = ['firstName', 'lastName', 'email', 'school', 'grade', 'specialty', 'isAdmin', 'emailVerified'];
+      const filteredUpdates = Object.keys(updates)
+        .filter(key => allowedFields.includes(key))
+        .reduce((obj: any, key) => {
+          obj[key] = updates[key];
+          return obj;
+        }, {});
+
+      await user.update(filteredUpdates);
 
       logger.info(`User ${userId} updated by admin`);
 
